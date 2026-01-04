@@ -113,9 +113,9 @@ class TestOrchestrator:
         assert len(output_files) == 1
 
         # Check that the derived variable was used in the filename
-        # Based on previous runs, FULL_NAME for Sample-W2.pdf was "UNIVERSITY OF PITTSBURGH\nX"
-        # So DERIVED_LAST_NAME should be "X"
-        assert "W2_X.pdf" == output_files[0].name
+        # FULL_NAME for Sample-W2.pdf should be "ELIZABETH A DARLING"
+        # So DERIVED_LAST_NAME should be "DARLING"
+        assert "W2_DARLING.pdf" == output_files[0].name
 
     def test_orchestrator_unmatched(self, rules_dir, temp_dirs):
         """Test handling of unmatched files."""

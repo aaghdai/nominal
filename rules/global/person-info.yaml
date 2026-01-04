@@ -19,10 +19,13 @@ criteria:
 
 actions:
   # Extract full name from uppercase format (common in tax forms)
+  # Matches person names (2-3 words with optional middle initial)
+  # followed by either $ (payer names) or newline+address (recipient names)
+  # Excludes organization names (UNIVERSITY, COMPANY, CORPORATION, etc.)
   - type: regex_extract
     variable: FULL_NAME
     from_text: true
-    pattern: '\b([A-Z]{2,}(?:\s+[A-Z]+)+)\s+\d+'
+    pattern: '\b((?!(?:UNIVERSITY|COMPANY|CORPORATION|INC|LLC|OF)\b)[A-Z][A-Z]+(?:\s+[A-Z]\.?)?(?:\s+[A-Z][A-Z]+))(?=\s+\$|\s*\n\s*\d{3,})'
     group: 1
     required: false
 
