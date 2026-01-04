@@ -47,20 +47,22 @@ text = reader.read_pdf('tax_document.pdf')
 result = processor.process_document(text)
 
 if result:
-    print(f"Form Type: {result['form_name']}")
-    print(f"Variables: {result['variables']}")
+    print(f"Form Type: {result['rule_id']}")
+    print(f"Global Variables: {result['global_variables']}")
+    print(f"Local Variables: {result['local_variables']}")
 ```
 
 ### Example Output
 
 ```
 Form Type: W2
-Variables: {
-    'FORM_NAME': 'W2',
-    'SSN': '123-45-6789',
+Global Variables: {
+    'TIN_LAST_FOUR': '6789',
     'FIRST_NAME': 'John',
-    'LAST_NAME': 'Smith',
-    'SSN_LAST_FOUR': '6789'
+    'LAST_NAME': 'Smith'
+}
+Local Variables: {
+    'FORM_NAME': 'W2'
 }
 ```
 
@@ -92,42 +94,33 @@ Orchestrates the complete workflow: reading, processing, and file renaming.
 
 ## Rule Files
 
-Rules are defined in YAML format. Here's a simple example for W2 forms:
+Rules are organized into two types:
+
+### Global Rules (`rules/global/`)
+Extract common variables from all documents (e.g., TIN_LAST_FOUR, names).
+
+### Form Rules (`rules/forms/`)
+Classify documents by form type (W2, 1099-DIV, etc.).
+
+Here's an example form rule for W2:
 
 ```yaml
 form_name: W2
 description: IRS Form W-2 - Wage and Tax Statement
 
-variables:
-  global:
-    - SSN
-    - FIRST_NAME
-    - LAST_NAME
-    - SSN_LAST_FOUR
-  local:
-    - FORM_NAME
-
 criteria:
   - type: regex
     pattern: '(?i)w-?2'
     description: "Document must contain W-2"
-
-  - type: regex
-    pattern: '\b\d{3}-\d{2}-\d{4}\b'
-    capture: true
-    variable: SSN
+  - type: any
+    criteria:
+      - type: regex
+        pattern: '(?i)wage\s+and\s+tax\s+statement'
 
 actions:
   - type: set
     variable: FORM_NAME
     value: "W2"
-
-  - type: derive
-    variable: SSN_LAST_FOUR
-    from: SSN
-    method: slice
-    args:
-      start: -4
 ```
 
 See [rules/README.md](rules/README.md) for complete DSL documentation.
@@ -155,26 +148,29 @@ nominal/
 │           ├── manager.py     # Rules manager
 │           ├── parser.py      # YAML parser
 │           ├── rule.py        # Rule data structures
-│           ├── validator.py   # Rule validation
-│           └── variable.py    # Variable implementations
+│           └── validator.py   # Rule validation
 ├── rules/                     # Rule definition files
-│   ├── w2.yaml               # W2 form rules
-│   ├── 1099-div.yaml         # 1099-DIV form rules
-│   ├── 1099-misc.yaml        # 1099-MISC form rules
-│   ├── global-variables.yaml # Global variables schema
-│   └── README.md             # Rule DSL documentation
+│   ├── global/                # Global extraction rules
+│   │   └── person-info.yaml   # Extracts common variables (TIN, names)
+│   ├── forms/                 # Form classification rules
+│   │   ├── w2.yaml            # W2 form rules
+│   │   ├── 1099-div.yaml      # 1099-DIV form rules
+│   │   └── 1099-misc.yaml     # 1099-MISC form rules
+│   └── README.md              # Rule DSL documentation
 ├── test/
-│   └── nominal/              # Test files (mirrors src structure)
-│       ├── reader/           # Reader tests
-│       ├── logging/           # Logging tests
+│   ├── fixtures/              # Test PDF files
+│   └── nominal/               # Test files (mirrors src structure)
+│       ├── reader/             # Reader tests
+│       ├── logging/            # Logging tests
 │       ├── processor/         # Processor tests
-│       └── rules/             # Rules tests
-├── examples/                  # Example scripts
+│       └── rules/              # Rules tests
+├── examples/                   # Example scripts
 ├── docs/                      # Documentation
 ├── scripts/                   # Utility scripts
 ├── tools/                     # Development tools
-├── .env.example              # Environment variables template
-└── PLAN.md                   # Project roadmap
+│   └── validate_rules.py      # Rule validation tool
+├── .env.example               # Environment variables template
+└── PLAN.md                    # Project roadmap
 ```
 
 ## Development
