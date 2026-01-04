@@ -19,8 +19,8 @@ class TestProcessorIntegration:
     @pytest.fixture
     def rules_dir(self):
         """Get the rules directory path."""
-        # Assuming rules directory is at project root
-        project_root = Path(__file__).parent.parent.parent
+        # Rules directory is at project root (3 levels up from test file)
+        project_root = Path(__file__).parent.parent.parent.parent
         return str(project_root / "rules")
 
     @pytest.fixture
@@ -40,7 +40,8 @@ class TestProcessorIntegration:
     @pytest.fixture
     def fixtures_dir(self):
         """Get the fixtures directory path."""
-        return Path(__file__).parent.parent / "fixtures"
+        # Fixtures directory is at test/fixtures (3 levels up from test file)
+        return Path(__file__).parent.parent.parent / "fixtures"
 
     @pytest.fixture
     def w2_pdf_text(self, reader, fixtures_dir):
