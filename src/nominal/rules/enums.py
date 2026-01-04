@@ -21,3 +21,4 @@ class ActionType(StrEnum):
     REGEX_EXTRACT = "regex_extract"
     DERIVE = "derive"
     EXTRACT = "extract"
+    VALIDATED_REGEX_EXTRACT = "validated_regex_extract"

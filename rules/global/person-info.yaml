@@ -45,15 +45,15 @@ actions:
     group: 1
     required: false
 
-  # STRATEGY 4: Fallback - uppercase name pattern
-  # Person names (2-3 words with optional middle initial)
-  # followed by either $ (payer names) or newline+address (recipient names)
-  # Excludes organization keywords
-  - type: regex_extract
+  # STRATEGY 4: Validated fallback - extract and validate all potential names
+  # Finds all uppercase name patterns and validates them against US Census data
+  # This helps distinguish actual person names from organization names
+  - type: validated_regex_extract
     variable: FULL_NAME
     from_text: true
-    pattern: '\b((?!(?:UNIVERSITY|COMPANY|CORPORATION|INC|LLC|OF|DEPT|BANK|TRUST|CITY|COUNTY|STATE)\b)[A-Z][A-Z]+(?:\s+[A-Z]\.?)?(?:\s+[A-Z][A-Z]+))(?=\s+\$|\s*\n\s*\d{3,})'
+    pattern: '\b([A-Z][A-Z]+(?:\s+[A-Z]\.?)?\s+[A-Z][A-Z]+)(?=\s+\$|\s*\n\s*\d{3,})'
     group: 1
+    min_confidence: 0.5
     required: false
 
   # Extract first name (mixed case format)

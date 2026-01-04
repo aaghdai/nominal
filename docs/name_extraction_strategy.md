@@ -1,14 +1,62 @@
 # Name Extraction Strategy
 
-## Current Problem
+## ✅ Implemented Solution (January 2026)
 
-The current regex-based name extraction is brittle:
+The system now uses a **validated multi-strategy approach** combining:
+
+1. **Context-Aware Field Extraction** (Strategies 1-3 in `person-info.yaml`)
+   - Looks for explicit field labels: "Employee's name", "RECIPIENT'S name", etc.
+   - Most reliable for standard form layouts
+
+2. **Validated Pattern Matching** (Strategy 4 - Fallback)
+   - Uses the new `validated_regex_extract` action type
+   - Extracts ALL candidate names matching the pattern
+   - Validates each against US Census name databases
+   - Returns the highest-confidence match above threshold
+
+### How Validation Works
+
+```yaml
+# In rules/global/person-info.yaml
+- type: validated_regex_extract
+  variable: FULL_NAME
+  from_text: true
+  pattern: '\b([A-Z][A-Z]+(?:\s+[A-Z]\.?)?\s+[A-Z][A-Z]+)(?=...)'
+  group: 1
+  min_confidence: 0.5  # 50% threshold
+```
+
+**Confidence scoring:**
+- First name in database: +0.5
+- Last name in database: +0.5
+- Has middle initial: +0.1
+- **Total**: 0.0-1.0 (capped at 1.0)
+
+**Example results:**
+- `MICHAEL M JORDAN`: 1.0 (both names + middle initial)
+- `ELIZABETH A DARLING`: 1.0 (both names + middle initial)
+- `STERLING HEIGHTS`: 0.0 (neither in database)
+- `UNIVERSITY OF PITTSBURGH`: 0.0 (not valid names)
+
+### Data Files
+
+Located in `data/`:
+- `first_names.txt`: 40,836 first names from SSA (2020-2023)
+- `last_names.txt`: 50,000 surnames from US Census (2010)
+
+See `data/README.md` for regeneration instructions.
+
+---
+
+## Original Problem Analysis (Historical)
+
+The initial regex-based name extraction was brittle:
 - Over-fitted to specific document layouts
 - No validation that extracted text is actually a name
 - Incomplete organization keyword exclusion
 - Context-blind (doesn't use field labels)
 
-## Recommended Solutions (Multi-Strategy Approach)
+## Solution Design (Multi-Strategy Approach)
 
 ### Strategy 1: Context-Aware Field Extraction (PRIMARY) ✅
 

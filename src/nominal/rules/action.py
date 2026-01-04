@@ -9,6 +9,7 @@ from typing import Any
 from nominal.logging import setup_logger
 
 from .enums import ActionType
+from .name_validator import validate_full_name
 
 logger = setup_logger()
 
@@ -202,3 +203,90 @@ class ExtractAction(Action):
 
     def get_type(self) -> ActionType:
         return ActionType.EXTRACT
+
+
+class ValidatedRegexExtractAction(Action):
+    """Action that extracts a value using regex and validates it as a person name."""
+
+    def __init__(
+        self,
+        variable: str,
+        pattern: str,
+        group: int = 0,
+        from_text: bool = True,
+        min_confidence: float = 0.5,
+    ):
+        super().__init__(variable)
+        self.pattern = pattern
+        self.group = group
+        self.from_text = from_text
+        self.min_confidence = min_confidence
+
+    def act(self, text: str, variables: dict[str, str]) -> str | None:
+        if not self.from_text:
+            return None
+
+        logger.debug(
+            f"Attempting validated regex extraction for {self.variable}: "
+            f"pattern='{self.pattern}'"
+        )
+
+        try:
+            # Find all matches instead of just the first
+            matches = list(re.finditer(self.pattern, text, re.IGNORECASE))
+        except re.error as e:
+            logger.error(f"Invalid regex pattern '{self.pattern}' for {self.variable}: {e}")
+            return None
+
+        if not matches:
+            logger.debug(f"✗ Regex pattern did not match for {self.variable}")
+            return None
+
+        # Extract all candidate names
+        candidates = []
+        for match in matches:
+            if self.group < len(match.groups()) + 1:
+                candidate = match.group(self.group)
+                if candidate:
+                    candidates.append(candidate.strip())
+
+        if not candidates:
+            logger.debug(f"✗ No candidates found for {self.variable}")
+            return None
+
+        logger.debug(f"Found {len(candidates)} candidates: {candidates}")
+
+        # Validate and score each candidate
+        scored = []
+        for candidate in candidates:
+            validation = validate_full_name(candidate)
+            scored.append((candidate, validation))
+            logger.debug(
+                f"  Candidate '{candidate}': "
+                f"confidence={validation['confidence']:.2f}, "
+                f"reason={validation['reason']}"
+            )
+
+        # Sort by confidence and take the best one above threshold
+        scored.sort(key=lambda x: x[1]["confidence"], reverse=True)
+
+        for candidate, validation in scored:
+            if validation["confidence"] >= self.min_confidence:
+                logger.info(
+                    f"✓ Extracted {self.variable}='{candidate}' "
+                    f"(confidence={validation['confidence']:.2f})"
+                )
+                return candidate
+
+        # If no candidate meets threshold, log the best attempt
+        if scored:
+            best_candidate, best_validation = scored[0]
+            logger.debug(
+                f"✗ Best candidate '{best_candidate}' has confidence "
+                f"{best_validation['confidence']:.2f} < {self.min_confidence}"
+            )
+
+        return None
+
+    def get_type(self) -> ActionType:
+        return ActionType.VALIDATED_REGEX_EXTRACT

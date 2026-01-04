@@ -13,7 +13,14 @@ import yaml
 
 from nominal.logging import setup_logger
 
-from .action import Action, DeriveAction, ExtractAction, RegexExtractAction, SetAction
+from .action import (
+    Action,
+    DeriveAction,
+    ExtractAction,
+    RegexExtractAction,
+    SetAction,
+    ValidatedRegexExtractAction,
+)
 from .criterion import (
     AllCriterion,
     AnyCriterion,
@@ -170,6 +177,15 @@ class RuleParser:
                 from_var=data.get("from"),
                 method=data.get("method"),
                 args=data.get("args", {}),
+            )
+
+        elif action_type == ActionType.VALIDATED_REGEX_EXTRACT:
+            return ValidatedRegexExtractAction(
+                variable=variable,
+                pattern=data.get("pattern"),
+                group=data.get("group", 0),
+                from_text=data.get("from_text", False),
+                min_confidence=data.get("min_confidence", 0.5),
             )
 
         else:

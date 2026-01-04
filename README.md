@@ -11,6 +11,7 @@ Nominal is a Python library for processing tax documents. It can read PDF files 
 - **Rule-Based Processing**: Define custom rules using a simple YAML-based DSL
 - **Form Identification**: Automatically identify tax forms (W2, 1099, etc.)
 - **Variable Extraction**: Extract key information like names, SSNs, form types
+- **Validated Name Extraction**: Uses US Census data to distinguish person names from organizations
 - **Batch Processing**: Process multiple documents efficiently
 - **Extensible**: Easy to add support for new form types
 
