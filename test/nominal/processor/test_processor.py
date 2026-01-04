@@ -18,7 +18,7 @@ class TestNominalProcessor:
 
         # Create a form rule for classification
         rule_data = {
-            "form_name": "W2",
+            "rule_id": "W2",
             "description": "Test W2",
             "criteria": [{"type": "contains", "value": "form w-2", "case_sensitive": False}],
             "actions": [
@@ -49,7 +49,7 @@ class TestNominalProcessor:
 
         # Create a global rule for variable extraction
         global_rule_data = {
-            "rule_name": "ssn-extractor",
+            "rule_id": "ssn-extractor",
             "description": "Extract SSN",
             "criteria": [{"type": "regex", "pattern": "."}],  # Match any document
             "actions": [
@@ -67,7 +67,7 @@ class TestNominalProcessor:
 
         # Create a form rule for classification
         form_rule_data = {
-            "form_name": "W2",
+            "rule_id": "W2",
             "description": "Test W2",
             "criteria": [{"type": "contains", "value": "form w-2", "case_sensitive": False}],
             "actions": [{"type": "set", "variable": "FORM_NAME", "value": "W2"}],
@@ -94,7 +94,7 @@ class TestNominalProcessor:
 
         # Create a rule
         rule_data = {
-            "form_name": "W2",
+            "rule_id": "W2",
             "description": "Test W2",
             "criteria": [{"type": "contains", "value": "form w-2", "case_sensitive": False}],
             "actions": [],
@@ -117,7 +117,7 @@ class TestNominalProcessor:
         """Test loading a rule from a YAML file."""
         # Create a temporary rule file
         rule_content = """
-form_name: TEST
+rule_id: TEST
 description: Test form
 criteria:
   - type: contains
@@ -144,7 +144,7 @@ actions:
     def test_load_global_rule_file(self):
         """Test loading a global rule from a YAML file."""
         rule_content = """
-rule_name: test-global
+rule_id: test-global
 description: Test global rule
 criteria:
   - type: regex

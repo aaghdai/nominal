@@ -1,5 +1,5 @@
 # IRS Form 1099-DIV - Dividends and Distributions
-form_name: 1099-DIV
+rule_id: 1099-DIV
 description: IRS Form 1099-DIV - Dividends and Distributions
 
 # Classification criteria - determines if document is a 1099-DIV

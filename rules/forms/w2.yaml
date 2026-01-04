@@ -1,5 +1,5 @@
 # IRS Form W-2 - Wage and Tax Statement
-form_name: W2
+rule_id: W2
 description: IRS Form W-2 - Wage and Tax Statement
 
 # Classification criteria - determines if document is a W-2

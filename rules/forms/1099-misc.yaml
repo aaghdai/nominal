@@ -1,5 +1,5 @@
 # IRS Form 1099-MISC - Miscellaneous Information
-form_name: 1099-MISC
+rule_id: 1099-MISC
 description: IRS Form 1099-MISC - Miscellaneous Information
 
 # Classification criteria - determines if document is a 1099-MISC

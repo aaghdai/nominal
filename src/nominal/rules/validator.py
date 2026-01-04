@@ -43,10 +43,10 @@ class RuleValidator:
             self.errors.append(f"{path.name}: Invalid YAML syntax: {e}")
             return False
 
-        # Validate required identifier (either form_name or rule_name)
-        rule_id = data.get("form_name") or data.get("rule_name")
+        # Validate required identifier
+        rule_id = data.get("rule_id")
         if not rule_id:
-            self.errors.append(f"{path.name}: Missing required field: 'form_name' or 'rule_name'")
+            self.errors.append(f"{path.name}: Missing required field: 'rule_id'")
             return False
 
         # Validate required fields

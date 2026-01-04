@@ -1,7 +1,7 @@
 # Global Rule: Person Information Extraction
 # This rule extracts common person information across all tax documents
 
-rule_name: person-info
+rule_id: person-info
 description: Extracts taxpayer/recipient personal information
 
 # No criteria - applies to all documents (global extraction)

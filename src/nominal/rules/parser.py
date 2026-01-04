@@ -50,11 +50,11 @@ class RuleParser:
 
     def parse_dict(self, data: dict[str, Any]) -> Rule:
         """Parse a dictionary into a Rule object."""
-        # Get rule identifier (form_name for forms, rule_name for global rules)
-        rule_id = data.get("form_name") or data.get("rule_name")
+        # Get rule identifier
+        rule_id = data.get("rule_id")
         if not rule_id:
-            logger.error("Rule must have either 'form_name' or 'rule_name' field")
-            raise ValueError("Rule must have either 'form_name' or 'rule_name' field")
+            logger.error("Rule must have a 'rule_id' field")
+            raise ValueError("Rule must have a 'rule_id' field")
 
         # Validate required fields
         required_fields = ["criteria", "actions"]

@@ -25,7 +25,7 @@ class TestRuleParser:
     def test_parse_simple_rule(self):
         """Test parsing a simple rule."""
         rule_data = {
-            "form_name": "W2",
+            "rule_id": "W2",
             "description": "Test form",
             "variables": {
                 "global": ["FIRST_NAME", "LAST_NAME"],
@@ -107,7 +107,7 @@ class TestRuleParser:
         parser = RuleParser()
 
         with pytest.raises(ValueError, match="Missing required field"):
-            parser.parse_dict({"form_name": "W2"})
+            parser.parse_dict({"rule_id": "W2"})
 
 
 class TestCriterion:
