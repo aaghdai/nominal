@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added - Name Validation System
+No unreleased changes yet.
+
+---
+
+## [0.4.0] - 2026-01-04
+
+### Added - Milestone 4: Advanced Features & Name Validation
 
 #### Validated Name Extraction
 - **ValidatedRegexExtractAction**: New action type for intelligent name extraction
@@ -281,30 +287,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Project Milestones
 
-### ✅ Milestone 1: Implement the Reader (Complete)
+### ✅ Milestone 1: Implement the Reader (v0.1.0)
 - PDF text extraction
 - OCR fallback for image-based PDFs
 - Comprehensive testing
+- **Status**: Complete ✅
 
-### ✅ Milestone 2: Process a Batch of PDF Files (Complete)
+### ✅ Milestone 2: Process a Batch of PDF Files (v0.2.0)
 - YAML-based rule DSL
 - Pattern matching and criteria evaluation
 - Variable extraction and transformation
 - Batch processing support
 - Comprehensive testing and documentation
+- **Status**: Complete ✅
 
-### 🔄 Milestone 3: Implement Orchestrator (Planned)
+### ✅ Milestone 3: Implement Orchestrator (v0.3.0)
 - File renaming based on extracted variables
 - Batch directory processing
-- Error logging
-- CLI interface
-- Configuration management
+- Error logging and unmatched file tracking
+- CLI interface (`nominal` command)
+- Integration with Reader and Processor
+- **Status**: Complete ✅
+
+### ✅ Milestone 4: Advanced Features & Name Validation (v0.4.0)
+- Validated name extraction with US Census data
+- Orchestrator-level derived variables
+- CLI tools for dictionary generation (`nominal-generate-names`)
+- Advanced CLI command (`nominal-derived`)
+- Pattern validation
+- Comprehensive documentation
+- **Status**: Complete ✅
+
+**All milestones completed!** The system is production-ready with full test coverage (46 tests passing).
 
 ---
 
 ## Version History
 
-- **Unreleased**: Logging system, code quality tools, refactoring improvements
+- **0.4.0** (2026-01-04): Advanced Features & Name Validation (Milestone 4) ✅
+- **0.3.0** (2026-01-03): Orchestrator implementation (Milestone 3) ✅
 - **0.2.0** (2026-01-03): Processor implementation (Milestone 2) ✅
 - **0.1.0** (2025-12-XX): Reader implementation (Milestone 1) ✅
 - **0.0.0** (Initial): Project setup
@@ -375,7 +396,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-[Unreleased]: https://github.com/aaghdai/nominal/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/aaghdai/nominal/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/aaghdai/nominal/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/aaghdai/nominal/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/aaghdai/nominal/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/aaghdai/nominal/releases/tag/v0.1.0
