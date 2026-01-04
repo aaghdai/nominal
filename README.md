@@ -34,6 +34,21 @@ cp .env.example .env
 
 ### Basic Usage
 
+#### Command Line Interface
+
+Process documents with the simple CLI:
+
+```bash
+# Basic processing
+uv run nominal process \
+  --input ./test_input \
+  --output ./output_results \
+  --rules ./rules \
+  --pattern "{rule_id}_{LAST_NAME}_{TIN_LAST_FOUR}"
+```
+
+#### Python API
+
 ```python
 from nominal.reader import NominalReader
 from nominal.processor import NominalProcessor
@@ -65,6 +80,65 @@ Local Variables: {
     'FORM_NAME': 'W2'
 }
 ```
+
+### Advanced: Derived Variables
+
+For advanced use cases, you can compute additional variables from extracted data using **orchestrator-level derived variables**. This is useful for:
+- Extracting parts of values (e.g., last name from full name)
+- Computing composite values
+- Applying custom formatting or business logic
+
+#### Using the Derived Variables CLI
+
+```bash
+# Process with built-in derived variables
+uv run nominal-derived \
+  --input ./test_input \
+  --output ./output_results \
+  --rules ./rules \
+  --pattern "{YEAR}_{LAST_NAME}_{FIRST_NAME}_{rule_id}"
+```
+
+**Built-in derived variables:**
+- `LAST_NAME` - Extract last name from FULL_NAME
+- `FIRST_NAME` - Extract first name from FULL_NAME
+- `FULL_TIN` - Format TIN with dashes (XXX-XX-XXXX)
+- `NAME_TIN_COMBO` - Combined last name and TIN last 4
+- `YEAR` - Document year
+
+#### Programmatic Usage with Custom Derivations
+
+```python
+from nominal.orchestrator import NominalOrchestrator
+
+# Define custom derivation functions
+def extract_last_name(all_vars):
+    """Extract last name from FULL_NAME."""
+    full_name = all_vars.get("FULL_NAME", "")
+    return full_name.split()[-1] if full_name else "UNKNOWN"
+
+def format_year(all_vars):
+    """Extract and format tax year."""
+    return all_vars.get("TAX_YEAR", "2024")
+
+# Initialize orchestrator with derived variables
+orchestrator = NominalOrchestrator(
+    rules_dir="rules/",
+    derived_variables={
+        "LAST_NAME": extract_last_name,
+        "TAX_YEAR": format_year,
+    }
+)
+
+# Process directory with derived variables in filename pattern
+stats = orchestrator.process_directory(
+    input_dir="input/",
+    output_dir="output/",
+    filename_pattern="{TAX_YEAR}_{rule_id}_{LAST_NAME}_{TIN_LAST_FOUR}"
+)
+```
+
+See `src/nominal/scripts_derived.py` for the complete implementation with detailed documentation.
 
 ## Components
 
