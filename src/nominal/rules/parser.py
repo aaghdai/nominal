@@ -69,11 +69,9 @@ class RuleParser:
         variables = data.get("variables", {})
         global_vars = variables.get("global", [])
         local_vars = variables.get("local", [])
-        derived_vars = variables.get("derived", [])
 
         logger.debug(
-            f"Rule {rule_id} variables: global={len(global_vars)}, "
-            f"local={len(local_vars)}, derived={len(derived_vars)}"
+            f"Rule {rule_id} variables: global={len(global_vars)}, " f"local={len(local_vars)}"
         )
 
         # Parse criteria
@@ -99,7 +97,6 @@ class RuleParser:
             description=data.get("description", ""),
             global_variables=global_vars,
             local_variables=local_vars,
-            derived_variables=derived_vars,
             criteria=criteria,
             actions=actions,
         )

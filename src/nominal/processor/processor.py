@@ -268,7 +268,6 @@ class NominalProcessor:
         for rule in self.global_rules + self.form_rules:
             variables.update(rule.global_variables)
             variables.update(rule.local_variables)
-            variables.update(rule.derived_variables)
         return variables
 
     def get_global_variables(self) -> dict[str, str]:

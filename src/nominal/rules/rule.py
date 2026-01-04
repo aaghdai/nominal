@@ -22,16 +22,13 @@ class Rule:
     description: str
     global_variables: list[str]  # Batch-level variables (e.g., SSN, FIRST_NAME, LAST_NAME)
     local_variables: list[str]  # Document-level variables (e.g., FORM_NAME)
-    derived_variables: list[
-        str
-    ]  # Variables that can be computed or extracted (e.g., SSN_LAST_FOUR)
     criteria: list[Criterion]
     actions: list[Action]
 
     @property
     def all_variables(self) -> list[str]:
         """Returns all variable names defined in this rule."""
-        return self.global_variables + self.local_variables + self.derived_variables
+        return self.global_variables + self.local_variables
 
     def apply(self, text: str) -> dict[str, Any] | None:
         """

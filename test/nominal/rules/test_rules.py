@@ -30,7 +30,6 @@ class TestRuleParser:
             "variables": {
                 "global": ["FIRST_NAME", "LAST_NAME"],
                 "local": ["FORM_NAME"],
-                "derived": [],
             },
             "criteria": [{"type": "contains", "value": "form w-2", "case_sensitive": False}],
             "actions": [{"type": "set", "variable": "FORM_NAME", "value": "W2"}],
@@ -43,7 +42,6 @@ class TestRuleParser:
         assert rule.description == "Test form"
         assert "FIRST_NAME" in rule.global_variables
         assert "FORM_NAME" in rule.local_variables
-        assert len(rule.derived_variables) == 0
         assert len(rule.criteria) == 1
         assert len(rule.actions) == 1
 
