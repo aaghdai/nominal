@@ -73,6 +73,16 @@ class RuleValidator:
         # Validate actions structure
         self._validate_actions(path.name, data.get("actions", []))
 
+        # Enforce FORM_NAME for form rules
+        if "forms" in str(path.parent):
+            sets_form_name = any(
+                a.get("type") == "set" and a.get("variable") == "FORM_NAME"
+                for a in data.get("actions", [])
+            )
+            if not sets_form_name:
+                self.errors.append(f"{path.name}: Form rule must set 'FORM_NAME' variable")
+                return False
+
         print(f"  ✓ Rule ID: {rule_id}")
         if "variables" in data:
             print(f"  ✓ Global variables: {len(data['variables'].get('global', []))}")

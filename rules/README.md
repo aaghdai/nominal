@@ -22,14 +22,15 @@ Global rules extract common information from all documents:
 - Personal identification (names, TIN)
 - Variables that are consistent across multiple documents
 
-Global rules use `rule_name` instead of `form_name` and are applied to every document before classification.
+Global rules use `rule_id` and are applied to every document before classification.
 
 ### Form Rules (`forms/`)
 
 Form rules classify documents by form type:
 - W-2, 1099-DIV, 1099-MISC, etc.
 - Each rule defines criteria for matching a specific form type
-- Form rules use `form_name` and return classification results
+- Form rules use `rule_id` and return classification results
+- **Constraint**: All form rules MUST set the `FORM_NAME` variable in their actions.
 
 ## Processing Flow
 
@@ -43,7 +44,7 @@ Form rules classify documents by form type:
 ### Global Rule Example
 
 ```yaml
-rule_name: person-info
+rule_id: person-info
 description: Extracts taxpayer personal information
 
 criteria:
@@ -61,7 +62,7 @@ actions:
 ### Form Rule Example
 
 ```yaml
-form_name: W2
+rule_id: W2
 description: IRS Form W-2 - Wage and Tax Statement
 
 criteria:
@@ -88,7 +89,7 @@ python tools/validate_rules.py
 
 ## Adding New Rules
 
-1. **Form Rule**: Add a new YAML file in `forms/` with `form_name`, `criteria`, and `actions`
-2. **Global Rule**: Add a new YAML file in `global/` with `rule_name`, `criteria`, and `actions`
+1. **Form Rule**: Add a new YAML file in `forms/` with `rule_id`, `criteria`, and `actions` (including setting `FORM_NAME`)
+2. **Global Rule**: Add a new YAML file in `global/` with `rule_id`, `criteria`, and `actions`
 3. Run validation to ensure the rule is correct
 4. Run tests to verify behavior
