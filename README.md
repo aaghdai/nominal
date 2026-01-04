@@ -214,6 +214,9 @@ See [rules/README.md](rules/README.md) for complete DSL documentation.
 nominal/
 ├── src/
 │   └── nominal/
+│       ├── __init__.py
+│       ├── main.py            # CLI entry point
+│       ├── scripts_derived.py # Advanced CLI with derived variables
 │       ├── reader/            # PDF reading and OCR package
 │       │   ├── __init__.py
 │       │   └── reader.py
@@ -223,6 +226,9 @@ nominal/
 │       ├── processor/         # Rule-based processing package
 │       │   ├── __init__.py
 │       │   └── processor.py
+│       ├── orchestrator/      # Workflow orchestration package
+│       │   ├── __init__.py
+│       │   └── orchestrator.py
 │       └── rules/             # Rules engine package
 │           ├── __init__.py
 │           ├── action.py      # Action implementations
@@ -242,18 +248,34 @@ nominal/
 │   └── README.md              # Rule DSL documentation
 ├── test/
 │   ├── fixtures/              # Test PDF files
+│   │   ├── Sample-W2.pdf
+│   │   └── Sample-1099-image.pdf
 │   └── nominal/               # Test files (mirrors src structure)
-│       ├── reader/             # Reader tests
-│       ├── logging/            # Logging tests
+│       ├── reader/            # Reader tests
+│       ├── logging/           # Logging tests
 │       ├── processor/         # Processor tests
-│       └── rules/              # Rules tests
-├── examples/                   # Example scripts
+│       ├── orchestrator/      # Orchestrator tests
+│       └── rules/             # Rules tests
+├── examples/                  # Example scripts
+│   ├── example_processor.py
+│   ├── example_logging.py
+│   └── README.md
 ├── docs/                      # Documentation
+│   ├── processor.md
+│   ├── architecture.md
+│   └── logging/
 ├── scripts/                   # Utility scripts
+│   ├── update_changelog_stats.sh
+│   └── README.md
 ├── tools/                     # Development tools
-│   └── validate_rules.py      # Rule validation tool
+│   ├── validate_rules.py      # Rule validation tool
+│   └── README.md
+├── test_input/                # Sample input files for testing
 ├── .env.example               # Environment variables template
-└── PLAN.md                    # Project roadmap
+├── CHANGELOG.md               # Project changelog
+├── PLAN.md                    # Project roadmap
+├── pyproject.toml             # Project configuration
+└── uv.lock                    # Dependency lock file
 ```
 
 ## Development
