@@ -27,7 +27,7 @@ class TestProcessorIntegration:
     def processor(self, rules_dir):
         """Create a processor with loaded rules."""
         if not os.path.exists(rules_dir):
-            pytest.skip(f"Rules directory not found: {rules_dir}")
+            pytest.fail(f"Rules directory not found: {rules_dir}")
 
         processor = NominalProcessor(rules_dir)
         return processor
@@ -48,7 +48,7 @@ class TestProcessorIntegration:
         """Extract text from the W2 PDF fixture using reader."""
         w2_pdf = fixtures_dir / "Sample-W2.pdf"
         if not w2_pdf.exists():
-            pytest.skip(f"W2 PDF fixture not found: {w2_pdf}")
+            pytest.fail(f"W2 PDF fixture not found: {w2_pdf}")
 
         # Isolate reader functionality - extract text from PDF
         text = reader.read_pdf(str(w2_pdf))
@@ -60,7 +60,7 @@ class TestProcessorIntegration:
         """Extract text from the 1099-MISC PDF fixture using reader."""
         w1099_pdf = fixtures_dir / "Sample-1099-image.pdf"
         if not w1099_pdf.exists():
-            pytest.skip(f"1099-MISC PDF fixture not found: {w1099_pdf}")
+            pytest.fail(f"1099-MISC PDF fixture not found: {w1099_pdf}")
 
         # Isolate reader functionality - extract text from PDF
         text = reader.read_pdf(str(w1099_pdf))
@@ -300,7 +300,7 @@ class TestProcessorIntegration:
     def test_multiple_rules_first_match_wins(self, rules_dir):
         """Test that when multiple rules could match, the first one wins."""
         if not os.path.exists(rules_dir):
-            pytest.skip(f"Rules directory not found: {rules_dir}")
+            pytest.fail(f"Rules directory not found: {rules_dir}")
 
         processor = NominalProcessor(rules_dir)
 
@@ -321,7 +321,7 @@ class TestProcessorIntegration:
         """Test that reader functionality is isolated - can extract text independently."""
         w2_pdf = fixtures_dir / "Sample-W2.pdf"
         if not w2_pdf.exists():
-            pytest.skip(f"W2 PDF fixture not found: {w2_pdf}")
+            pytest.fail(f"W2 PDF fixture not found: {w2_pdf}")
 
         # Step 1: Use reader to extract text (isolated reader functionality)
         extracted_text = reader.read_pdf(str(w2_pdf))
