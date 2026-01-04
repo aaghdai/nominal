@@ -28,7 +28,7 @@ cd nominal
 uv sync
 
 # Generate name validation dictionaries (recommended for accurate name extraction)
-python scripts/generate_name_dictionaries.py
+uv run nominal-generate-names
 
 # Optional: Configure logging level via .env file
 cp .env.example .env
@@ -36,7 +36,7 @@ cp .env.example .env
 # Log level is automatically loaded from .env file when package is imported
 ```
 
-**Note:** The name dictionaries (`data/first_names.txt` and `data/last_names.txt`) are included in the repository, but you can regenerate them anytime using the script above. This downloads fresh data from US Census Bureau and Social Security Administration sources.
+**Note:** The name dictionaries (`data/first_names.txt` and `data/last_names.txt`) are included in the repository, but you can regenerate them anytime using `uv run nominal-generate-names`. This downloads fresh data from US Census Bureau and Social Security Administration sources.
 
 ### Basic Usage
 
@@ -223,6 +223,9 @@ nominal/
 │       ├── __init__.py
 │       ├── main.py            # CLI entry point
 │       ├── scripts_derived.py # Advanced CLI with derived variables
+│       ├── scripts/           # Utility scripts package
+│       │   ├── __init__.py
+│       │   └── generate_names.py  # Name dictionary generator
 │       ├── reader/            # PDF reading and OCR package
 │       │   ├── __init__.py
 │       │   └── reader.py

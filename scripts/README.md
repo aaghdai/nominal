@@ -9,11 +9,11 @@ Generates name validation dictionaries from US Census and SSA data sources.
 ### Usage
 
 ```bash
-# From project root
-python scripts/generate_name_dictionaries.py
+# As a CLI command (recommended)
+uv run nominal-generate-names
 
-# Or using uv
-uv run python scripts/generate_name_dictionaries.py
+# Or directly
+python scripts/generate_name_dictionaries.py
 ```
 
 ### What it does
@@ -96,6 +96,32 @@ Run this script before making commits that add or modify code, tests, or documen
 ## CLI Commands
 
 The following scripts are available as CLI commands via `uv run`:
+
+### nominal-generate-names
+
+Generate name validation dictionaries from US Census and SSA data.
+
+**Location:** `src/nominal/scripts/generate_names.py`
+
+**Usage:**
+```bash
+uv run nominal-generate-names
+```
+
+**What it does:**
+- Downloads US Census Bureau surnames (top 50,000)
+- Downloads SSA baby names from 2020-2023 (40K+ unique names)
+- Creates `data/first_names.txt` and `data/last_names.txt`
+- Automatically cleans up temporary files
+
+**Requirements:** `wget` or `curl` must be installed
+
+**When to run:**
+- Initial setup (if dictionaries are missing)
+- To update with newer data sources
+- After modifying extraction logic
+
+---
 
 ### nominal-derived
 

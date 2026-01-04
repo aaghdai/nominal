@@ -15,6 +15,7 @@ dependencies = [
 [project.scripts]
 nominal = "nominal.main:main"
 nominal-derived = "nominal.scripts_derived:main"
+nominal-generate-names = "nominal.scripts.generate_names:main"
 
 [tool.uv]
 dev-dependencies = [

@@ -70,14 +70,14 @@ This validation helps distinguish between:
 
 ### Regenerating the Data
 
-To update or regenerate the name dictionaries, use the provided script:
+To update or regenerate the name dictionaries, use the CLI command:
 
 ```bash
-# From project root
-python scripts/generate_name_dictionaries.py
+# Using the CLI command (recommended)
+uv run nominal-generate-names
 
-# Or using uv
-uv run python scripts/generate_name_dictionaries.py
+# Or run the script directly
+python scripts/generate_name_dictionaries.py
 ```
 
 The script will:
