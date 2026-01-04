@@ -106,7 +106,7 @@ criteria:
   - type: regex
     pattern: '(?i)w-?2'
     description: "Document must contain W-2"
-  
+
   - type: regex
     pattern: '\b\d{3}-\d{2}-\d{4}\b'
     capture: true
@@ -116,7 +116,7 @@ actions:
   - type: set
     variable: FORM_NAME
     value: "W2"
-  
+
   - type: derive
     variable: SSN_LAST_FOUR
     from: SSN

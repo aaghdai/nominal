@@ -7,59 +7,59 @@ All functionality has been moved to the processor package for better organizatio
 
 # Import everything from the processor package for backward compatibility
 from .processor import (
-    # Enums
-    VariableScope,
-    CriterionType,
-    ActionType,
-    # Variables
-    Variable,
-    GlobalVariable,
-    LocalVariable,
-    # Criteria
-    Criterion,
-    ContainsCriterion,
-    RegexCriterion,
-    AllCriterion,
-    AnyCriterion,
     # Actions
     Action,
-    SetAction,
-    RegexExtractAction,
+    ActionType,
+    AllCriterion,
+    AnyCriterion,
+    ContainsCriterion,
+    # Criteria
+    Criterion,
+    CriterionType,
     DeriveAction,
     ExtractAction,
+    GlobalVariable,
+    LocalVariable,
+    # Main processor
+    NominalProcessor,
+    RegexCriterion,
+    RegexExtractAction,
     # Rule
     Rule,
     # Parser
     RuleParser,
-    # Main processor
-    NominalProcessor,
+    SetAction,
+    # Variables
+    Variable,
+    # Enums
+    VariableScope,
 )
 
 __all__ = [
     # Enums
-    'VariableScope',
-    'CriterionType',
-    'ActionType',
+    "VariableScope",
+    "CriterionType",
+    "ActionType",
     # Variables
-    'Variable',
-    'GlobalVariable',
-    'LocalVariable',
+    "Variable",
+    "GlobalVariable",
+    "LocalVariable",
     # Criteria
-    'Criterion',
-    'ContainsCriterion',
-    'RegexCriterion',
-    'AllCriterion',
-    'AnyCriterion',
+    "Criterion",
+    "ContainsCriterion",
+    "RegexCriterion",
+    "AllCriterion",
+    "AnyCriterion",
     # Actions
-    'Action',
-    'SetAction',
-    'RegexExtractAction',
-    'DeriveAction',
-    'ExtractAction',
+    "Action",
+    "SetAction",
+    "RegexExtractAction",
+    "DeriveAction",
+    "ExtractAction",
     # Rule
-    'Rule',
+    "Rule",
     # Parser
-    'RuleParser',
+    "RuleParser",
     # Main processor
-    'NominalProcessor',
+    "NominalProcessor",
 ]

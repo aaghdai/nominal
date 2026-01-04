@@ -66,7 +66,7 @@ Renames or labels the file based on a specified format and the variables extract
     - ✅ Created comprehensive unit and integration tests (29 tests, all passing)
     - ✅ Created example rule files (W2, 1099-MISC)
     - ✅ Created documentation and examples
-- **Location**: 
+- **Location**:
     - Code: `src/nominal/processor.py`
     - Rules: `rules/` directory
     - Tests: `test/nominal/test_processor.py`, `test/nominal/test_processor_integration.py`

@@ -7,6 +7,7 @@ from enum import StrEnum
 
 class VariableScope(StrEnum):
     """Variable scope enumeration."""
+
     GLOBAL = "global"
     LOCAL = "local"
     DERIVED = "derived"  # Variables that can be computed from other variables
@@ -14,6 +15,7 @@ class VariableScope(StrEnum):
 
 class CriterionType(StrEnum):
     """Criterion type enumeration."""
+
     CONTAINS = "contains"
     REGEX = "regex"
     ALL = "all"
@@ -22,8 +24,8 @@ class CriterionType(StrEnum):
 
 class ActionType(StrEnum):
     """Action type enumeration."""
+
     SET = "set"
     REGEX_EXTRACT = "regex_extract"
     DERIVE = "derive"
     EXTRACT = "extract"
-

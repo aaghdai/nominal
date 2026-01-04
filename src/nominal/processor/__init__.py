@@ -6,31 +6,15 @@ from tax documents based on configurable rules.
 """
 
 # Enums
-from .enums import VariableScope, CriterionType, ActionType
-
-# Variables
-from .variable import Variable, GlobalVariable, LocalVariable, DerivedVariable
-
-# Criteria
-from .criterion import (
-    Criterion,
-    ContainsCriterion,
-    RegexCriterion,
-    AllCriterion,
-    AnyCriterion
-)
+# Logging (imported from parent package)
+from nominal.logging_config import configure_logging, get_logger, set_log_level, setup_logger
 
 # Actions
-from .action import (
-    Action,
-    SetAction,
-    RegexExtractAction,
-    DeriveAction,
-    ExtractAction
-)
+from .action import Action, DeriveAction, ExtractAction, RegexExtractAction, SetAction
 
-# Rule
-from .rule import Rule
+# Criteria
+from .criterion import AllCriterion, AnyCriterion, ContainsCriterion, Criterion, RegexCriterion
+from .enums import ActionType, CriterionType, VariableScope
 
 # Parser
 from .parser import RuleParser
@@ -38,41 +22,43 @@ from .parser import RuleParser
 # Main processor
 from .processor import NominalProcessor
 
-# Logging (imported from parent package)
-from nominal.logging_config import setup_logger, get_logger, set_log_level, configure_logging
+# Rule
+from .rule import Rule
+
+# Variables
+from .variable import DerivedVariable, GlobalVariable, LocalVariable, Variable
 
 __all__ = [
     # Enums
-    'VariableScope',
-    'CriterionType',
-    'ActionType',
+    "VariableScope",
+    "CriterionType",
+    "ActionType",
     # Variables
-    'Variable',
-    'GlobalVariable',
-    'LocalVariable',
-    'DerivedVariable',
+    "Variable",
+    "GlobalVariable",
+    "LocalVariable",
+    "DerivedVariable",
     # Criteria
-    'Criterion',
-    'ContainsCriterion',
-    'RegexCriterion',
-    'AllCriterion',
-    'AnyCriterion',
+    "Criterion",
+    "ContainsCriterion",
+    "RegexCriterion",
+    "AllCriterion",
+    "AnyCriterion",
     # Actions
-    'Action',
-    'SetAction',
-    'RegexExtractAction',
-    'DeriveAction',
-    'ExtractAction',
+    "Action",
+    "SetAction",
+    "RegexExtractAction",
+    "DeriveAction",
+    "ExtractAction",
     # Rule
-    'Rule',
+    "Rule",
     # Parser
-    'RuleParser',
+    "RuleParser",
     # Main processor
-    'NominalProcessor',
+    "NominalProcessor",
     # Logging
-    'setup_logger',
-    'get_logger',
-    'set_log_level',
-    'configure_logging',
+    "setup_logger",
+    "get_logger",
+    "set_log_level",
+    "configure_logging",
 ]
-

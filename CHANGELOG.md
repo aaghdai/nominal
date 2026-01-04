@@ -14,21 +14,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Validates required fields and structure
   - Supports all DSL components
   - Comprehensive error handling
-  
+
 - **CriteriaEvaluator**: Evaluate matching criteria against document text
   - `contains` criterion (case-sensitive/insensitive)
   - `regex` criterion with optional capture
   - `all` criterion (logical AND)
   - `any` criterion (logical OR)
   - Captures values during evaluation
-  
+
 - **ActionExecutor**: Execute actions to extract and transform variables
   - `set` action (literal values)
   - `regex_extract` action (pattern-based extraction)
   - `derive` action (slice, upper, lower transformations)
   - `extract` action (split and extract)
   - Variable context management
-  
+
 - **NominalProcessor**: Main orchestration class
   - Load rules from directories
   - Process documents against rules
@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - CriteriaEvaluator tests (6 tests)
   - ActionExecutor tests (5 tests)
   - NominalProcessor tests (3 tests)
-  
+
 - `test/nominal/test_processor_integration.py`: 5 integration tests
   - W2 form recognition tests
   - Real PDF processing tests
@@ -62,19 +62,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Performance considerations
   - Troubleshooting guide
   - Extension guide
-  
+
 - `docs/milestone2_summary.md`: Implementation summary
   - Completed tasks breakdown
   - Technical achievements
   - Design decisions
   - Success metrics
-  
+
 - `docs/architecture.md`: Visual architecture diagrams
   - System architecture
   - Component architecture
   - Data flow diagrams
   - Class hierarchy
-  
+
 - Updated `README.md`: Added processor overview and quick start
 - Updated `PLAN.md`: Marked Milestone 2 as complete
 
@@ -233,4 +233,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 [Unreleased]: https://github.com/yourusername/nominal/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/yourusername/nominal/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/yourusername/nominal/releases/tag/v0.1.0
-

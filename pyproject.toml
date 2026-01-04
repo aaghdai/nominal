@@ -14,7 +14,43 @@ dependencies = [
 [tool.uv]
 dev-dependencies = [
     "pytest",
+    "ruff",
+    "pre-commit",
 ]
+
+[tool.ruff]
+# Set the maximum line length
+line-length = 100
+
+# Exclude common directories
+exclude = [
+    ".git",
+    "__pycache__",
+    ".venv",
+    "venv",
+    ".eggs",
+    "*.egg",
+    "build",
+    "dist",
+]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Indent with spaces
+indent-style = "space"
+# Respect magic trailing commas
+skip-magic-trailing-comma = false
+# Automatically detect the appropriate line ending
+line-ending = "auto"
+
+[tool.ruff.lint]
+# Enable pycodestyle (E, W), Pyflakes (F), and isort (I) rules
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+# Allow autofix for all enabled rules
+fixable = ["ALL"]
+unfixable = []
 
 [build-system]
 requires = ["hatchling"]

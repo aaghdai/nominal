@@ -321,7 +321,7 @@ pdf_dir = Path('documents/')
 for pdf_file in pdf_dir.glob('*.pdf'):
     text = reader.read_pdf(str(pdf_file))
     result = processor.process_document(text)
-    
+
     if result:
         # Process matched document
         form_name = result['variables'].get('FORM_NAME', 'UNKNOWN')
@@ -337,12 +337,12 @@ def generate_filename(result):
     """Generate filename from extracted variables."""
     if not result:
         return None
-    
+
     vars = result['variables']
     form = vars.get('FORM_NAME', 'UNKNOWN')
     last_name = vars.get('LAST_NAME', 'UNKNOWN')
     ssn_last_four = vars.get('SSN_LAST_FOUR', 'XXXX')
-    
+
     return f"{form}_{last_name}_{ssn_last_four}.pdf"
 
 # Usage
@@ -448,4 +448,3 @@ Typical processing times (on modern hardware):
 - [Rules DSL Documentation](../rules/README.md)
 - [Nominal Reader Documentation](reader.md)
 - [Example Script](../example_processor.py)
-

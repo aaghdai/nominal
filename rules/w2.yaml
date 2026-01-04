@@ -17,7 +17,7 @@ criteria:
   - type: regex
     pattern: '(?i)w-?2'
     description: "Document must contain W-2 or W2"
-  
+
   # At least one of the following should be true
   - type: any
     criteria:
@@ -25,7 +25,7 @@ criteria:
       - type: regex
         pattern: '\b\d{3}-\d{2}-\d{4}\b|XXX-XX-\d{4}'
         description: "Social Security Number"
-      
+
       # Has wage/tax keywords
       - type: regex
         pattern: '(?i)(wage|tax|statement|employer|employee)'
@@ -36,41 +36,41 @@ actions:
   - type: set
     variable: FORM_NAME
     value: "W2"
-  
+
   # Try to extract SSN (full or masked)
   - type: regex_extract
     variable: SSN
     from_text: true
     pattern: '\b(\d{3}-\d{2}-\d{4})\b|(XXX-XX-\d{4})'
     group: 0
-  
+
   # Try to extract SSN_LAST_FOUR directly (if only last 4 available)
   - type: regex_extract
     variable: SSN_LAST_FOUR
     from_text: true
     pattern: '(?:SSN|Social Security).*?(\d{4})(?!\d)'
     group: 1
-  
+
   # Try to extract name (uppercase format like in real W2s)
   - type: regex_extract
     variable: FULL_NAME
     from_text: true
     pattern: '\b([A-Z]+\s+[A-Z]+\s+[A-Z]+)\s+\d+'
     group: 1
-  
+
   # Try to extract name (mixed case format)
   - type: regex_extract
     variable: FIRST_NAME
     from_text: true
     pattern: '(?:Employee.*?name|name).*?:\s*([A-Z][a-z]+)'
     group: 1
-  
+
   - type: regex_extract
     variable: LAST_NAME
     from_text: true
     pattern: '(?:Employee.*?name|name).*?:\s*[A-Z][a-z]+\s+([A-Z][a-z]+)'
     group: 1
-  
+
   # Derive SSN_LAST_FOUR from full SSN if SSN is available and SSN_LAST_FOUR wasn't extracted
   - type: derive
     variable: SSN_LAST_FOUR
@@ -78,4 +78,3 @@ actions:
     method: slice
     args:
       start: -4
-

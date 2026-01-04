@@ -257,4 +257,3 @@ The processor logs:
 - **DEBUG**: Criterion checks, action attempts
 - **WARNING**: Global variable conflicts
 - **ERROR**: Invalid patterns, parsing failures
-

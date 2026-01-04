@@ -197,7 +197,7 @@ criteria:
     value: "form w-2"
     case_sensitive: false
     description: "Document must contain 'form w-2'"
-  
+
   - type: regex
     pattern: '\b\d{3}-\d{2}-\d{4}\b'
     capture: true
@@ -208,19 +208,19 @@ actions:
   - type: set
     variable: FORM_NAME
     value: "W2"
-  
+
   - type: regex_extract
     variable: FIRST_NAME
     from_text: true
     pattern: '\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
     group: 1
-  
+
   - type: regex_extract
     variable: LAST_NAME
     from_text: true
     pattern: '\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b'
     group: 2
-  
+
   - type: derive
     variable: SSN_LAST_FOUR
     from: SSN
@@ -245,4 +245,3 @@ To add support for a new form type:
 2. Define the form structure following the format above
 3. Test with sample documents
 4. The processor will automatically load all YAML files in this directory
-

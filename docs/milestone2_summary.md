@@ -207,7 +207,7 @@ result = processor.process_document(text)
 if result:
     form_type = result['form_name']
     variables = result['variables']
-    
+
     # Use extracted information
     new_filename = (
         f"{variables.get('FORM_NAME', 'UNKNOWN')}_"
@@ -266,4 +266,3 @@ The implementation exceeds the original requirements with additional features li
 - Variable transformations
 - Comprehensive error handling
 - Real-world testing with sample PDFs
-
