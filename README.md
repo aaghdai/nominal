@@ -21,7 +21,7 @@ Nominal is a Python library for processing tax documents. It can read PDF files 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/nominal.git
+git clone https://github.com/aaghdai/nominal.git
 cd nominal
 
 # Install dependencies
