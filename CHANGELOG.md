@@ -5,6 +5,87 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added - Name Validation System
+
+#### Validated Name Extraction
+- **ValidatedRegexExtractAction**: New action type for intelligent name extraction
+  - Extracts multiple candidate names using regex patterns
+  - Validates each candidate against US Census name databases
+  - Scores candidates with confidence levels (0.0-1.0)
+  - Returns highest-confidence match above configurable threshold
+  - Distinguishes person names from organization names
+
+- **Name Validator Module** (`src/nominal/rules/name_validator.py`)
+  - Loads and caches name dictionaries for fast validation
+  - `validate_full_name()`: Validates and extracts first/last name components
+  - `score_name_candidates()`: Scores and ranks multiple candidates
+  - Confidence scoring based on first name, last name, and middle initial recognition
+
+- **Name Dictionaries** (`data/`)
+  - `first_names.txt`: 40,836 unique first names from SSA (2020-2023)
+  - `last_names.txt`: 50,000 surnames from US Census Bureau (2010)
+  - Total: 90,836 name entries for validation
+  - Public domain data from US government sources
+
+#### CLI Tools
+- **nominal-generate-names**: New CLI command for dictionary generation
+  - Downloads US Census Bureau surnames (top 50,000)
+  - Downloads SSA baby names (2020-2023)
+  - Processes and creates validation dictionaries
+  - Automatic cleanup of temporary files
+  - Fallback support for wget/curl
+  - Accessible via `uv run nominal-generate-names`
+
+- **Scripts Package** (`src/nominal/scripts/`)
+  - Utility scripts as importable modules
+  - `generate_names.py`: Dictionary generator with smart path resolution
+  - Finds project root via `pyproject.toml` detection
+
+#### Documentation
+- **Name Extraction Strategy** (`docs/name_extraction_strategy.md`)
+  - Comprehensive multi-strategy approach documentation
+  - Context-aware extraction patterns
+  - Validation methodology and confidence scoring
+  - Implementation examples and best practices
+
+- **Data Directory Documentation** (`data/README.md`)
+  - Dictionary sources and format specification
+  - Usage examples with validation
+  - Regeneration instructions
+  - Benefits and trade-offs
+
+- **Updated Rule Files**
+  - `rules/global/person-info.yaml`: Enhanced with validated extraction
+  - Multi-strategy approach: context-aware → validated fallback
+  - Improved accuracy for person name identification
+
+### Changed
+- **Rule DSL**: Added `validated_regex_extract` action type
+- **Action Enums**: Added `VALIDATED_REGEX_EXTRACT` to `ActionType`
+- **Rule Parser**: Extended to parse validated extraction actions
+- **Project Structure**: Added `src/nominal/scripts/` package
+- **pyproject.toml**: Added `nominal-generate-names` CLI entry point
+- **Installation**: Updated to include dictionary generation step
+
+### Technical Details
+- Confidence scoring algorithm: first name (0.5) + last name (0.5) + middle initial bonus (0.1)
+- Lazy loading and caching of name dictionaries for performance
+- Regex patterns with negative lookaheads for organization exclusion
+- Context-aware field label extraction (primary strategy)
+- Validated pattern matching (fallback strategy)
+
+### Test Results
+- Total tests: 46 (all passing)
+- Name validation accuracy: 100% on test fixtures
+- Successfully distinguishes:
+  - Person names: `MICHAEL M JORDAN`, `ELIZABETH A DARLING`
+  - Organizations: `UNIVERSITY OF PITTSBURGH`, `STERLING HEIGHTS`
+  - False positives: `ZIP CODE`, `NONDIVIDEND DISTRIBUTIONS`
+
+---
+
 ## [0.3.0] - 2026-01-03
 
 ### Added - Milestone 3: Nominal Orchestrator
@@ -57,76 +138,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Package distribution configuration for CLI script
 
 ---
-
-## [Unreleased]
-
-### Added
-- **Project-level logging system** (`src/nominal/logging/`)
-  - Colored logging output (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  - Environment-based configuration via `.env` file using `python-dotenv`
-  - Automatic logger name detection (no need to specify module name)
-  - `configure_logging()` function for centralized configuration
-  - Comprehensive logging throughout all components
-  - Logging documentation in `docs/logging/README.md`
-  - `.env.example` file for project configuration template
-
-- **Code quality tools**
-  - Ruff linter and formatter integration
-  - Pre-commit hooks for automatic code formatting
-  - Git hooks that run on every commit
-  - Automated import sorting and code style enforcement
-
-- **Examples directory** (`examples/`)
-  - `example_processor.py`: Core processor usage examples
-  - `example_logging.py`: Logging level demonstrations
-  - `example_project_logging.py`: Project-level logging configuration
-  - `README.md`: Examples documentation
-
-### Changed
-- **Package reorganization**
-  - Separated `reader` into its own package (`src/nominal/reader/`)
-  - Separated `logging` into its own package (`src/nominal/logging/`)
-  - Separated `rules` into its own package (`src/nominal/rules/`)
-  - `processor` package now only contains the main `NominalProcessor` class
-  - Tests reorganized to mirror source structure (`test/nominal/reader/`, `test/nominal/processor/`, `test/nominal/rules/`)
-  - Improved separation of concerns and modularity
-
-- **Logging system improvements**
-  - Removed `level` parameter from `setup_logger()` - now uses project-level settings
-  - Log level configured via `NOMINAL_LOG_LEVEL` environment variable (defaults to INFO)
-  - Automatic logger name detection using `inspect` module
-  - Environment variables loaded automatically via `python-dotenv`
-  - `.env.example` file added for easy configuration
-
-- **Processor refactoring**
-  - Split `processor.py` into modular package structure
-  - Separated enums, base classes, implementations, parser, and evaluator
-  - Improved code organization and maintainability
-
-- **Project organization**
-  - Moved example scripts to dedicated `examples/` directory
-  - Moved logging documentation to `docs/logging/` directory
-  - Updated all path references to work from new locations
-
-- **Test improvements**
-  - Removed unnecessary `sys.path` manipulation from test files
-  - Removed `# noqa: E402` tags (no longer needed)
-  - Cleaner test code following best practices
-  - All tests work with package installed in editable mode
-
-- **Code quality**
-  - Fixed all linting issues (line length, import ordering, unused imports)
-  - Enforced 100-character line length limit
-  - Consistent code formatting across entire codebase
-  - All code passes ruff checks
-
-### Technical Details
-- Ruff configuration in `pyproject.toml`
-- Pre-commit hooks configured in `.pre-commit-config.yaml`
-- Automatic code formatting on git commit
-- Project-level logging configuration via environment variables
-- `python-dotenv` dependency for `.env` file support
-- Automatic module name detection for loggers
 
 ## [0.2.0] - 2026-01-03
 
@@ -303,52 +314,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Statistics
 
 ### Code
-- **Source Code**: 1923 lines across all modules
-  - Reader module: ~0 lines
-  - Processor package: ~294 lines (2 modules: enums, variable, criterion, action, rule, parser, processor, logging_config)
-  - Main package: ~97 lines
-- **Test Code**: 970 lines across all test files
-- **Documentation**: 1294 lines across multiple files
-  - Architecture and design docs
-  - API reference and usage guides
-  - Logging documentation
-  - Examples and tutorials
+- **Source Code**: 2724 lines across all modules
+  - Reader package: 128 lines (2 files)
+  - Logging package: 208 lines (2 files)
+  - Processor package: 302 lines (2 files)
+  - Orchestrator package: 250 lines (2 files)
+  - Rules package: 1243 lines (9 files)
+  - Scripts package: 242 lines (2 files)
+  - Main/CLI: 331 lines (2 files)
+- **Test Code**: 1014 lines across 13 test files
+- **Documentation**: 1549 lines across 5 markdown files
 
 ### Test Coverage
-- **Unit Tests**: 24 tests
-- **Integration Tests**: 5 tests
-- **Total**: 44 tests
+- **Total Tests**: 46 tests
 - **Pass Rate**: 100%
 
-### Files Created/Modified
-- **Core modules**: 18 Python files
-  - Reader: 1 file
-  - Processor package: 2 files (enums, variable, criterion, action, rule, parser, processor, logging_config)
-  - Package init: 2 files
-  - Main: 1 file
-- **Rule files**: 4 YAML files (w2.yaml, 1099-misc.yaml)
+### Files
+- **Source files**: 22 Python files
+- **Rule files**: 4 YAML files
 - **Test files**: 13 test modules
-- **Documentation files**: 4 markdown files
-  - Architecture documentation
-  - Processor documentation
-  - Logging documentation
-  - Milestone summaries
-- **Example files**: 3 Python scripts + README
-- **Configuration files**: 3 files (pyproject.toml, .pre-commit-config.yaml, .gitignore)
-- **Total**: 46+ files
+- **Documentation**: 5 markdown files
+- **Examples**: 3 Python scripts
+- **Configuration**: 3 files
+- **Total**: 50 files
 
 ### Features Implemented
-- PDF reading: ✅
-- OCR support: ✅
-- Rule parsing: ✅
-- Pattern matching: ✅
-- Variable extraction: ✅
-- Variable derivation: ✅
-- Batch processing: ✅
-- Logging system: ✅
+- PDF reading with OCR: ✅
+- YAML-based rule DSL: ✅
+- Pattern matching & extraction: ✅
+- Validated name extraction: ✅
+- Batch processing & orchestration: ✅
+- Derived variables: ✅
+- CLI interface (3 commands): ✅
+- Comprehensive logging: ✅
 - Code quality tools: ✅
-- Comprehensive testing: ✅
-- Full documentation: ✅
+- Full test coverage: ✅
+- Complete documentation: ✅
 
 ---
 
