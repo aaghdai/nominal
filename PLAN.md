@@ -104,9 +104,15 @@ Renames or labels the file based on a specified format and the variables extract
 - DSL Specification: `rules/README.md`
 - Example Usage: `examples/example_processor.py`
 
-### 🔄 Milestone 3: Implement Orchestrator (NEXT)
+### ✅ Milestone 3: Implement Orchestrator (COMPLETED)
 - **Goal**: Create the `nominal-orchestrator` to orchestrate the workflow and rename files.
-- **Status**: 🔄 Planned
+- **Status**: ✅ Complete
+- **Implementation**:
+    - ✅ **Phase 1 - File Renaming Engine**: Implemented pattern-based renaming using extracted variables
+    - ✅ **Phase 2 - Batch Directory Processor**: Implemented recursive directory scanning and processing
+    - ✅ **Phase 3 - Workflow Orchestration**: Integrated Reader, Processor, and Renamer
+    - ✅ **Phase 4 - Error Handling & Logging**: Implemented unmatched file reporting and error logs
+    - ✅ **Phase 5 - CLI Interface**: Created a command-line interface for the orchestrator
 - **Functionality**:
     - Accepts a directory path containing PDFs.
     - Runs `nominal-reader` on files.
@@ -115,6 +121,7 @@ Renames or labels the file based on a specified format and the variables extract
     - Writes files to an output path.
 - **Error Handling**:
     - If a file cannot be renamed (e.g., matching failed), write an error log to the output path.
+- **Location**: `src/nominal/orchestrator/` package
 
 ## Summary
 

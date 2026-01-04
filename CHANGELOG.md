@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-01-03
+
+### Added - Milestone 3: Nominal Orchestrator
+
+#### Core Orchestrator Module (`src/nominal/orchestrator/`)
+- **NominalOrchestrator**: Main workflow orchestration class
+  - Recursive directory scanning for PDF files
+  - Integration with Reader and Processor
+  - Pattern-based file renaming using extracted variables
+  - Graceful handling of duplicate filenames
+  - Robust error handling and reporting
+  - Detailed processing statistics
+
+- **Renaming Engine**: Powerful variable substitution in filenames
+  - Supports all extracted variables (global and local)
+  - Automatic sanitization of variable values for filenames
+  - Graceful fallback to 'UNKNOWN' for missing variables
+  - Duplicate filename detection and automatic numbering
+
+- **Error Handling & Reporting**
+  - Unmatched files are moved to a dedicated `unmatched/` directory
+  - Detailed error logs generated for each failure (unmatched or exception)
+  - Source files are preserved and copied to avoid data loss
+  - Comprehensive logging throughout the orchestration process
+
+#### CLI Interface
+- **Command-line Entry Point**: `nominal process` command
+  - `--input` (-i): Input directory to scan
+  - `--output` (-o): Output directory for renamed files
+  - `--rules` (-r): Rules directory for form identification
+  - `--pattern` (-p): Custom filename pattern (e.g., `{rule_id}_{FULL_NAME}`)
+  - `--no-ocr`: Option to disable OCR fallback for faster processing
+
+#### Testing
+- `test/nominal/orchestrator/test_orchestrator.py`: End-to-end tests
+  - Full workflow test with real PDF fixtures
+  - Unmatched document handling tests
+  - Error reporting verification
+  - Filename generation and sanitization tests
+
+### Changed
+- `pyproject.toml`: Added `nominal` CLI script entry point
+- `PLAN.md`: Marked Milestone 3 as complete
+- `src/nominal/main.py`: Updated to provide command-line interface
+
+### Technical Details
+- Command-line argument parsing using `argparse`
+- File system operations using `pathlib` and `shutil`
+- Placeholder replacement using regex for renaming patterns
+- Package distribution configuration for CLI script
+
+---
+
 ## [Unreleased]
 
 ### Added
@@ -250,12 +303,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Statistics
 
 ### Code
-- **Source Code**: 1266 lines across all modules
-  - Reader module: ~119 lines
-  - Processor package: ~937 lines (8 modules: enums, variable, criterion, action, rule, parser, processor, logging_config)
-  - Main package: ~210 lines
-- **Test Code**: 616 lines across all test files
-- **Documentation**: 1280 lines across multiple files
+- **Source Code**: 1923 lines across all modules
+  - Reader module: ~0 lines
+  - Processor package: ~294 lines (2 modules: enums, variable, criterion, action, rule, parser, processor, logging_config)
+  - Main package: ~97 lines
+- **Test Code**: 970 lines across all test files
+- **Documentation**: 1294 lines across multiple files
   - Architecture and design docs
   - API reference and usage guides
   - Logging documentation
@@ -264,17 +317,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Test Coverage
 - **Unit Tests**: 24 tests
 - **Integration Tests**: 5 tests
-- **Total**: 29 tests
+- **Total**: 44 tests
 - **Pass Rate**: 100%
 
 ### Files Created/Modified
-- **Core modules**: 12 Python files
+- **Core modules**: 18 Python files
   - Reader: 1 file
-  - Processor package: 8 files (enums, variable, criterion, action, rule, parser, processor, logging_config)
+  - Processor package: 2 files (enums, variable, criterion, action, rule, parser, processor, logging_config)
   - Package init: 2 files
   - Main: 1 file
-- **Rule files**: 2 YAML files (w2.yaml, 1099-misc.yaml)
-- **Test files**: 6 test modules
+- **Rule files**: 4 YAML files (w2.yaml, 1099-misc.yaml)
+- **Test files**: 13 test modules
 - **Documentation files**: 4 markdown files
   - Architecture documentation
   - Processor documentation
@@ -282,7 +335,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Milestone summaries
 - **Example files**: 3 Python scripts + README
 - **Configuration files**: 3 files (pyproject.toml, .pre-commit-config.yaml, .gitignore)
-- **Total**: 31+ files
+- **Total**: 46+ files
 
 ### Features Implemented
 - PDF reading: ✅
