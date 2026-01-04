@@ -1,0 +1,25 @@
+# Global Variables Schema
+# This file defines all possible global variables that can be used across all rules.
+# Individual rule files should only reference a subset of these variables that are
+# relevant to their specific form type.
+
+# Global variables are batch-level variables that are consistent across a group of PDF files.
+# They represent information about the person/taxpayer that appears across multiple forms.
+
+global_variables:
+  # Personal identification
+  - FIRST_NAME          # First name of the taxpayer/recipient
+  - LAST_NAME           # Last name of the taxpayer/recipient
+  - FULL_NAME           # Full name (alternative to FIRST_NAME/LAST_NAME, used for recipients)
+  - TIN_LAST_FOUR       # Last four digits of TIN/SSN (extracted directly from forms)
+
+  # Additional identification (can be added as needed)
+  # - EMPLOYER_NAME
+  # - EMPLOYER_EIN
+  # - ADDRESS
+  # - CITY
+  # - STATE
+  # - ZIP_CODE
+
+# Note: Rules should only declare global variables that they actually use.
+# The processor will validate that all declared global variables are defined in this schema.

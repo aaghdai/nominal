@@ -5,12 +5,13 @@ Rule class for representing form identification rules.
 from dataclasses import dataclass
 from typing import Any
 
-from nominal.logging_config import setup_logger
+from nominal.logging import setup_logger
 
 from .action import Action
 from .criterion import Criterion
+from .enums import ActionType
 
-logger = setup_logger("nominal.processor.rule")
+logger = setup_logger()
 
 
 @dataclass
@@ -37,6 +38,14 @@ class Rule:
         Apply the rule to the given text.
         Returns all extracted variables if all criteria match, None otherwise.
         Scope separation is handled by the processor.
+
+        Action execution order:
+        1. First phase: Execute all non-derive actions (set, regex_extract, extract)
+           to extract global and local variables from the document text.
+        2. Second phase: Execute all derive actions to compute derived variables
+           from the previously extracted variables.
+
+        This ensures derived variables are computed AFTER all source variables are available.
         """
         logger.info(f"Evaluating rule: {self.rule_id}")
         logger.debug(f"Rule description: {self.description}")
@@ -55,12 +64,37 @@ class Rule:
 
         logger.info(f"✓ All criteria passed for rule {self.rule_id}")
 
-        # Execute all actions
+        # Initialize variables with captured values from criteria
         all_variables = {}
         all_variables.update(all_captured_values)
 
-        logger.debug(f"Executing {len(self.actions)} actions")
-        for action in self.actions:
+        # Separate actions into two phases:
+        # Phase 1: Non-derive actions (set, regex_extract, extract) - extract global/local vars
+        # Phase 2: Derive actions - compute derived vars from extracted vars
+        non_derive_actions = [
+            action for action in self.actions if action.get_type() != ActionType.DERIVE
+        ]
+        derive_actions = [
+            action for action in self.actions if action.get_type() == ActionType.DERIVE
+        ]
+
+        # Phase 1: Execute non-derive actions to extract global and local variables
+        logger.debug(
+            f"Phase 1: Executing {len(non_derive_actions)} extraction actions "
+            f"(set, regex_extract, extract)"
+        )
+        for action in non_derive_actions:
+            result = action.act(text, all_variables)
+            if result is not None:
+                all_variables[action.variable] = result
+
+        # Phase 2: Execute derive actions to compute derived variables
+        # Derived variables are computed AFTER all source variables are extracted
+        logger.debug(
+            f"Phase 2: Executing {len(derive_actions)} derivation actions "
+            f"(derive - computed from extracted variables)"
+        )
+        for action in derive_actions:
             result = action.act(text, all_variables)
             if result is not None:
                 all_variables[action.variable] = result

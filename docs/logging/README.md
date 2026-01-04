@@ -55,7 +55,18 @@ Shows only errors:
 
 ### Project-Level Configuration (Recommended)
 
-The recommended way to configure logging is at the project level using `configure_logging()`:
+The recommended way to configure logging is using environment variables via a `.env` file:
+
+1. Create a `.env` file in the project root (or copy from `.env.example`):
+```bash
+NOMINAL_LOG_LEVEL=INFO
+```
+
+2. Available log levels: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
+
+3. The log level is automatically loaded when the package is imported.
+
+You can also configure logging programmatically using `configure_logging()`:
 
 ```python
 import logging
@@ -63,7 +74,10 @@ from nominal import configure_logging
 from nominal.reader import NominalReader
 from nominal.processor import NominalProcessor
 
-# Configure all components to DEBUG level
+# Configure all components using environment variable (default)
+configure_logging()
+
+# Or override programmatically
 configure_logging(logging.DEBUG)
 
 # Or configure only specific components
@@ -123,7 +137,7 @@ from nominal import setup_logger
 import logging
 
 # Create a custom logger
-my_logger = setup_logger('my_app', level=logging.DEBUG)
+my_logger = setup_logger('my_app')  # Log level from NOMINAL_LOG_LEVEL env var
 my_logger.info("Custom log message")
 ```
 

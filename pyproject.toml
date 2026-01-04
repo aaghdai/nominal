@@ -9,6 +9,7 @@ dependencies = [
     "pytesseract",
     "pillow",
     "pyyaml",
+    "python-dotenv",
 ]
 
 [tool.uv]

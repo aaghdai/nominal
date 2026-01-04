@@ -4,9 +4,8 @@ description: IRS Form 1099-MISC - Miscellaneous Income
 
 variables:
   global:
-    - RECIPIENT_NAME
-    - RECIPIENT_TIN
-    - TIN_LAST_FOUR
+    - FULL_NAME          # Recipient name (consolidated from RECIPIENT_NAME)
+    - TIN_LAST_FOUR      # Last four digits of TIN/SSN
   local:
     - FORM_NAME
 
@@ -17,18 +16,16 @@ criteria:
     case_sensitive: false
     description: "Document must contain '1099'"
 
-  # Must have TIN/SSN pattern
+  # Must have TIN/SSN pattern (full or last 4 digits)
   - type: regex
-    pattern: '\b\d{3}-\d{2}-\d{4}\b|\b\d{2}-\d{7}\b'
-    capture: true
-    variable: RECIPIENT_TIN
-    description: "Recipient's TIN (SSN or EIN format)"
+    pattern: '\b\d{3}-\d{2}-\d{4}\b|\b\d{2}-\d{7}\b|\b\d{4}\b'
+    description: "Recipient's TIN (SSN, EIN, or last 4 digits format)"
 
   # Must have recipient name (simplified pattern)
   - type: regex
     pattern: 'Recipient.*?:\s*([A-Z][a-zA-Z\s]+)'
     capture: true
-    variable: RECIPIENT_NAME
+    variable: FULL_NAME
     description: "Capture recipient name"
 
 actions:
@@ -37,10 +34,18 @@ actions:
     variable: FORM_NAME
     value: "1099-MISC"
 
-  # Derive last four digits of TIN
-  - type: derive
+  # Extract TIN_LAST_FOUR from full SSN pattern (extract last 4 digits)
+  - type: regex_extract
     variable: TIN_LAST_FOUR
-    from: RECIPIENT_TIN
-    method: slice
-    args:
-      start: -4
+    from_text: true
+    pattern: '\b\d{3}-\d{2}-(\d{4})\b'
+    group: 1
+    required: false
+
+  # Extract TIN_LAST_FOUR directly if only last 4 digits are shown (without full SSN)
+  - type: regex_extract
+    variable: TIN_LAST_FOUR
+    from_text: true
+    pattern: '(?:TIN|SSN|Social Security).*?(\d{4})(?!\d)'
+    group: 1
+    required: false

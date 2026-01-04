@@ -2,21 +2,31 @@
 Main processor class for orchestrating rule matching and variable extraction.
 """
 
-from pathlib import Path
 from typing import Any
 
-from nominal.logging_config import setup_logger
+from nominal.logging import setup_logger
+from nominal.rules import Rule, RuleParser, RulesManager, RuleValidator
 
-from .parser import RuleParser
-from .rule import Rule
-
-logger = setup_logger("nominal.processor")
+logger = setup_logger()
 
 
 class NominalProcessor:
     """Main processor class that orchestrates rule matching and variable extraction."""
 
-    def __init__(self, rules_dir: str | None = None):
+    def __init__(
+        self,
+        rules_dir: str | None = None,
+        schema_path: str | None = None,
+    ):
+        """
+        Initialize the processor.
+
+        Args:
+            rules_dir: Directory containing rule files. If None, rules must be loaded manually.
+            schema_path: Optional path to global variables schema file.
+                        If None and rules_dir is provided, looks for
+                        global-variables.yaml in rules_dir.
+        """
         self.rules: list[Rule] = []
         self.parser = RuleParser()
         self.global_variables: dict[str, str] = {}  # Batch-level global variables
@@ -24,24 +34,39 @@ class NominalProcessor:
         logger.info("NominalProcessor initialized")
 
         if rules_dir:
-            self.load_rules(rules_dir)
+            self.load_rules(rules_dir, schema_path=schema_path)
 
-    def load_rules(self, rules_dir: str):
-        """Load all rule files from a directory."""
+    def load_rules(
+        self,
+        rules_dir: str,
+        schema_path: str | None = None,
+        validate: bool = True,
+    ):
+        """
+        Load all rule files from a directory.
+
+        Args:
+            rules_dir: Directory containing rule files
+            schema_path: Optional path to global variables schema file.
+                        If None, looks for global-variables.yaml in rules_dir.
+            validate: Whether to validate rules before loading (default: True)
+        """
         logger.info(f"Loading rules from directory: {rules_dir}")
 
-        rules_path = Path(rules_dir)
-        if not rules_path.exists():
-            logger.error(f"Rules directory not found: {rules_dir}")
-            raise FileNotFoundError(f"Rules directory not found: {rules_dir}")
+        # Use RulesManager to handle rules directory structure
+        rules_manager = RulesManager(rules_dir, schema_path=schema_path)
 
-        # Load all YAML files
-        yaml_files = list(rules_path.glob("*.yaml")) + list(rules_path.glob("*.yml"))
+        # Validate rules before loading if requested
+        if validate:
+            self._validate_rules(rules_manager)
 
-        if not yaml_files:
+        # Get rule files from manager
+        rule_files = rules_manager.get_rule_files()
+
+        if not rule_files:
             logger.warning(f"No rule files (*.yaml or *.yml) found in {rules_dir}")
 
-        for rule_file in yaml_files:
+        for rule_file in rule_files:
             try:
                 rule = self.parser.parse_file(str(rule_file))
                 self.rules.append(rule)
@@ -52,9 +77,48 @@ class NominalProcessor:
 
         logger.info(f"Successfully loaded {len(self.rules)} rule(s)")
 
-    def load_rule(self, rule_path: str):
-        """Load a single rule file."""
+    def _validate_rules(self, rules_manager: RulesManager) -> None:
+        """Validate all rules using the rules manager."""
+        logger.info("Validating rules before loading...")
+
+        schema_path = rules_manager.get_schema_path()
+        validator = RuleValidator(global_vars_schema_path=schema_path)
+
+        # Validate all rules
+        try:
+            success = validator.validate_directory(str(rules_manager.rules_dir))
+            if validator.errors:
+                error_msg = f"Rule validation failed with {len(validator.errors)} error(s)"
+                logger.error(error_msg)
+                for error in validator.errors:
+                    logger.error(f"  • {error}")
+                raise ValueError(error_msg)
+
+            if validator.warnings:
+                logger.warning(
+                    f"Rule validation completed with {len(validator.warnings)} " f"warning(s)"
+                )
+                for warning in validator.warnings:
+                    logger.warning(f"  • {warning}")
+
+            if success:
+                logger.info("✓ All rules validated successfully")
+        except Exception as e:
+            logger.error(f"Rule validation failed: {e}")
+            raise
+
+    def load_rule(self, rule_path: str, validate: bool = False):
+        """
+        Load a single rule file.
+
+        Args:
+            rule_path: Path to a single rule file
+            validate: Whether to validate the rule (requires schema path)
+        """
         logger.info(f"Loading single rule: {rule_path}")
+
+        if validate:
+            logger.warning("Single rule validation not yet implemented")
 
         try:
             rule = self.parser.parse_file(rule_path)
