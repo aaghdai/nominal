@@ -195,6 +195,25 @@ uv run pytest --cov=nominal --cov-report=html
 uv run python examples/example_processor.py
 ```
 
+### Running on Test Fixtures
+
+You can run the Nominal CLI on the included test fixtures to see the orchestrator in action:
+
+```bash
+# Create an output directory
+mkdir -p output_results
+
+# Run the orchestrator
+uv run nominal process --input test/fixtures --output output_results --rules rules
+```
+
+This will:
+1. Scan `test/fixtures/` for PDF files.
+2. Apply global rules to extract common variables.
+3. Apply form rules to classify each document.
+4. Rename and move matched files to `output_results/`.
+5. Move unmatched files or those with errors to `output_results/unmatched/` with error logs.
+
 ### Updating Changelog Statistics
 
 Before making a commit, update the statistics section in `CHANGELOG.md`:
