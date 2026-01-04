@@ -25,6 +25,11 @@ cd nominal
 
 # Install dependencies
 uv sync
+
+# Optional: Configure logging level via .env file
+cp .env.example .env
+# Edit .env to set NOMINAL_LOG_LEVEL (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+# Log level is automatically loaded from .env file when package is imported
 ```
 
 ### Basic Usage
@@ -133,17 +138,42 @@ See [rules/README.md](rules/README.md) for complete DSL documentation.
 nominal/
 ├── src/
 │   └── nominal/
-│       ├── reader.py          # PDF reading and OCR
-│       └── processor.py       # Rule-based processing
-├── rules/
+│       ├── reader/            # PDF reading and OCR package
+│       │   ├── __init__.py
+│       │   └── reader.py
+│       ├── logging/           # Logging configuration package
+│       │   ├── __init__.py
+│       │   └── config.py
+│       ├── processor/         # Rule-based processing package
+│       │   ├── __init__.py
+│       │   └── processor.py
+│       └── rules/             # Rules engine package
+│           ├── __init__.py
+│           ├── action.py      # Action implementations
+│           ├── criterion.py   # Criterion implementations
+│           ├── enums.py       # Type enumerations
+│           ├── manager.py     # Rules manager
+│           ├── parser.py      # YAML parser
+│           ├── rule.py        # Rule data structures
+│           ├── validator.py   # Rule validation
+│           └── variable.py    # Variable implementations
+├── rules/                     # Rule definition files
 │   ├── w2.yaml               # W2 form rules
+│   ├── 1099-div.yaml         # 1099-DIV form rules
 │   ├── 1099-misc.yaml        # 1099-MISC form rules
+│   ├── global-variables.yaml # Global variables schema
 │   └── README.md             # Rule DSL documentation
 ├── test/
-│   ├── fixtures/             # Sample PDFs for testing
-│   └── nominal/              # Test files
-├── docs/                     # Documentation
-├── example_processor.py      # Example usage script
+│   └── nominal/              # Test files (mirrors src structure)
+│       ├── reader/           # Reader tests
+│       ├── logging/           # Logging tests
+│       ├── processor/         # Processor tests
+│       └── rules/             # Rules tests
+├── examples/                  # Example scripts
+├── docs/                      # Documentation
+├── scripts/                   # Utility scripts
+├── tools/                     # Development tools
+├── .env.example              # Environment variables template
 └── PLAN.md                   # Project roadmap
 ```
 
@@ -213,6 +243,7 @@ The script uses `uv` and `pytest` to gather accurate metrics, so ensure dependen
 - Tesseract OCR (for image-based PDFs)
 - PyYAML (rule file parsing)
 - Pillow (image processing)
+- python-dotenv (environment configuration)
 
 ## Contributing
 

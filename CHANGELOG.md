@@ -8,12 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **Project-level logging system** (`src/nominal/logging_config.py`)
+- **Project-level logging system** (`src/nominal/logging/`)
   - Colored logging output (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-  - Configurable log levels per component (reader, processor)
+  - Environment-based configuration via `.env` file using `python-dotenv`
+  - Automatic logger name detection (no need to specify module name)
   - `configure_logging()` function for centralized configuration
   - Comprehensive logging throughout all components
   - Logging documentation in `docs/logging/README.md`
+  - `.env.example` file for project configuration template
 
 - **Code quality tools**
   - Ruff linter and formatter integration
@@ -28,6 +30,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `README.md`: Examples documentation
 
 ### Changed
+- **Package reorganization**
+  - Separated `reader` into its own package (`src/nominal/reader/`)
+  - Separated `logging` into its own package (`src/nominal/logging/`)
+  - Separated `rules` into its own package (`src/nominal/rules/`)
+  - `processor` package now only contains the main `NominalProcessor` class
+  - Tests reorganized to mirror source structure (`test/nominal/reader/`, `test/nominal/processor/`, `test/nominal/rules/`)
+  - Improved separation of concerns and modularity
+
+- **Logging system improvements**
+  - Removed `level` parameter from `setup_logger()` - now uses project-level settings
+  - Log level configured via `NOMINAL_LOG_LEVEL` environment variable (defaults to INFO)
+  - Automatic logger name detection using `inspect` module
+  - Environment variables loaded automatically via `python-dotenv`
+  - `.env.example` file added for easy configuration
+
 - **Processor refactoring**
   - Split `processor.py` into modular package structure
   - Separated enums, base classes, implementations, parser, and evaluator
@@ -54,7 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ruff configuration in `pyproject.toml`
 - Pre-commit hooks configured in `.pre-commit-config.yaml`
 - Automatic code formatting on git commit
-- Project-level logging configuration
+- Project-level logging configuration via environment variables
+- `python-dotenv` dependency for `.env` file support
+- Automatic module name detection for loggers
 
 ## [0.2.0] - 2026-01-03
 

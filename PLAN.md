@@ -46,7 +46,7 @@ Renames or labels the file based on a specified format and the variables extract
     - ✅ Implemented OCR fallback for image-based PDFs
     - ✅ Added configurable OCR threshold
     - ✅ Created comprehensive tests
-- **Location**: `src/nominal/reader.py`
+- **Location**: `src/nominal/reader/` package
 
 ### ✅ Milestone 2: Process a Batch of PDF Files (COMPLETED)
 - **Goal**: Create the `nominal-processor` component to handle batch processing and variable extraction.
@@ -67,11 +67,11 @@ Renames or labels the file based on a specified format and the variables extract
     - ✅ Created example rule files (W2, 1099-MISC)
     - ✅ Created documentation and examples
 - **Location**:
-    - Code: `src/nominal/processor.py`
+    - Code: `src/nominal/processor/` and `src/nominal/rules/` packages
     - Rules: `rules/` directory
-    - Tests: `test/nominal/test_processor.py`, `test/nominal/test_processor_integration.py`
+    - Tests: `test/nominal/processor/` and `test/nominal/rules/` directories
     - Docs: `docs/processor.md`, `rules/README.md`
-    - Example: `example_processor.py`
+    - Examples: `examples/` directory
 
 **Key Features Implemented:**
 - ✅ Support batch input
@@ -99,10 +99,10 @@ Renames or labels the file based on a specified format and the variables extract
     - Values of batch-level variables.
 
 **See detailed documentation:**
-- Implementation: `src/nominal/processor.py`
+- Implementation: `src/nominal/processor/` and `src/nominal/rules/` packages
 - API Documentation: `docs/processor.md`
 - DSL Specification: `rules/README.md`
-- Example Usage: `example_processor.py`
+- Example Usage: `examples/example_processor.py`
 
 ### 🔄 Milestone 3: Implement Orchestrator (NEXT)
 - **Goal**: Create the `nominal-orchestrator` to orchestrate the workflow and rename files.
