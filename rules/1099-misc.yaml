@@ -1,0 +1,47 @@
+# IRS Form 1099-MISC - Miscellaneous Income
+form_name: 1099-MISC
+description: IRS Form 1099-MISC - Miscellaneous Income
+
+variables:
+  global:
+    - RECIPIENT_NAME
+    - RECIPIENT_TIN
+    - TIN_LAST_FOUR
+  local:
+    - FORM_NAME
+
+criteria:
+  # Document must contain "1099" text
+  - type: contains
+    value: "1099"
+    case_sensitive: false
+    description: "Document must contain '1099'"
+  
+  # Must have TIN/SSN pattern
+  - type: regex
+    pattern: '\b\d{3}-\d{2}-\d{4}\b|\b\d{2}-\d{7}\b'
+    capture: true
+    variable: RECIPIENT_TIN
+    description: "Recipient's TIN (SSN or EIN format)"
+  
+  # Must have recipient name (simplified pattern)
+  - type: regex
+    pattern: 'Recipient.*?:\s*([A-Z][a-zA-Z\s]+)'
+    capture: true
+    variable: RECIPIENT_NAME
+    description: "Capture recipient name"
+
+actions:
+  # Set form name
+  - type: set
+    variable: FORM_NAME
+    value: "1099-MISC"
+  
+  # Derive last four digits of TIN
+  - type: derive
+    variable: TIN_LAST_FOUR
+    from: RECIPIENT_TIN
+    method: slice
+    args:
+      start: -4
+
