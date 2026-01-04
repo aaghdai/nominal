@@ -4,8 +4,11 @@ Criterion classes for matching document content.
 
 import re
 from abc import ABC, abstractmethod
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 from .enums import CriterionType
+from nominal.logging_config import setup_logger
+
+logger = setup_logger('nominal.processor.criterion')
 
 
 class Criterion(ABC):
@@ -13,11 +16,15 @@ class Criterion(ABC):
     
     def __init__(self, description: str = ""):
         self.description = description
-        self.captured_values: Dict[str, str] = {}
     
     @abstractmethod
-    def match(self, text: str) -> bool:
-        """Check if the criterion matches the given text."""
+    def match(self, text: str) -> Tuple[bool, Dict[str, str]]:
+        """
+        Check if the criterion matches the given text.
+        
+        Returns:
+            Tuple of (match_result, captured_variables)
+        """
         pass
     
     @abstractmethod
@@ -34,7 +41,9 @@ class ContainsCriterion(Criterion):
         self.value = value
         self.case_sensitive = case_sensitive
     
-    def match(self, text: str) -> bool:
+    def match(self, text: str) -> Tuple[bool, Dict[str, str]]:
+        logger.debug(f"Checking contains criterion: '{self.value}' (case_sensitive={self.case_sensitive})")
+        
         search_text = text
         search_value = self.value
         
@@ -42,7 +51,14 @@ class ContainsCriterion(Criterion):
             search_text = text.lower()
             search_value = self.value.lower()
         
-        return search_value in search_text
+        result = search_value in search_text
+        
+        if result:
+            logger.debug(f"✓ Contains criterion matched: '{self.value}'")
+        else:
+            logger.debug(f"✗ Contains criterion failed: '{self.value}' not found")
+        
+        return (result, {})
     
     def get_type(self) -> CriterionType:
         return CriterionType.CONTAINS
@@ -57,13 +73,26 @@ class RegexCriterion(Criterion):
         self.capture = capture
         self.variable = variable
     
-    def match(self, text: str) -> bool:
-        match = re.search(self.pattern, text)
+    def match(self, text: str) -> Tuple[bool, Dict[str, str]]:
+        logger.debug(f"Checking regex criterion: pattern='{self.pattern}', capture={self.capture}")
         
-        if match and self.capture and self.variable:
-            self.captured_values[self.variable] = match.group(0)
+        try:
+            match = re.search(self.pattern, text)
+        except re.error as e:
+            logger.error(f"Invalid regex pattern '{self.pattern}': {e}")
+            return (False, {})
         
-        return match is not None
+        captured = {}
+        if match:
+            if self.capture and self.variable:
+                captured[self.variable] = match.group(0)
+                logger.info(f"✓ Regex matched and captured: {self.variable}='{match.group(0)}'")
+            else:
+                logger.debug(f"✓ Regex criterion matched: '{self.pattern}'")
+        else:
+            logger.debug(f"✗ Regex criterion failed: pattern '{self.pattern}' not found")
+        
+        return (match is not None, captured)
     
     def get_type(self) -> CriterionType:
         return CriterionType.REGEX
@@ -76,14 +105,20 @@ class AllCriterion(Criterion):
         super().__init__(description)
         self.sub_criteria = sub_criteria
     
-    def match(self, text: str) -> bool:
-        result = all(criterion.match(text) for criterion in self.sub_criteria)
+    def match(self, text: str) -> Tuple[bool, Dict[str, str]]:
+        logger.debug(f"Evaluating ALL criterion with {len(self.sub_criteria)} sub-criteria")
         
-        # Collect captured values from all sub-criteria
-        for criterion in self.sub_criteria:
-            self.captured_values.update(criterion.captured_values)
+        all_captured = {}
         
-        return result
+        for i, criterion in enumerate(self.sub_criteria, 1):
+            matches, captured = criterion.match(text)
+            if not matches:
+                logger.debug(f"✗ ALL criterion failed: sub-criterion {i}/{len(self.sub_criteria)} did not match")
+                return (False, {})
+            all_captured.update(captured)
+        
+        logger.debug(f"✓ ALL criterion matched: all {len(self.sub_criteria)} sub-criteria passed")
+        return (True, all_captured)
     
     def get_type(self) -> CriterionType:
         return CriterionType.ALL
@@ -96,13 +131,17 @@ class AnyCriterion(Criterion):
         super().__init__(description)
         self.sub_criteria = sub_criteria
     
-    def match(self, text: str) -> bool:
-        for criterion in self.sub_criteria:
-            if criterion.match(text):
-                # Collect captured values from matching criteria
-                self.captured_values.update(criterion.captured_values)
-                return True
-        return False
+    def match(self, text: str) -> Tuple[bool, Dict[str, str]]:
+        logger.debug(f"Evaluating ANY criterion with {len(self.sub_criteria)} sub-criteria")
+        
+        for i, criterion in enumerate(self.sub_criteria, 1):
+            matches, captured = criterion.match(text)
+            if matches:
+                logger.debug(f"✓ ANY criterion matched: sub-criterion {i}/{len(self.sub_criteria)} passed")
+                return (True, captured)
+        
+        logger.debug(f"✗ ANY criterion failed: none of {len(self.sub_criteria)} sub-criteria matched")
+        return (False, {})
     
     def get_type(self) -> CriterionType:
         return CriterionType.ANY

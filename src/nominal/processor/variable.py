@@ -40,3 +40,13 @@ class LocalVariable(Variable):
     def get_scope(self) -> VariableScope:
         return VariableScope.LOCAL
 
+
+class DerivedVariable(Variable):
+    """Derived variable that can be computed from other variables."""
+    
+    def __init__(self, name: str):
+        super().__init__(name, VariableScope.DERIVED)
+    
+    def get_scope(self) -> VariableScope:
+        return VariableScope.DERIVED
+

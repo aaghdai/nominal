@@ -7,9 +7,10 @@ variables:
     - FIRST_NAME
     - LAST_NAME
     - SSN
-    - SSN_LAST_FOUR
   local:
     - FORM_NAME
+  derived:
+    - SSN_LAST_FOUR  # Can be extracted directly or derived from SSN
 
 criteria:
   # Document must contain "w-2" or "w2" text
@@ -43,6 +44,13 @@ actions:
     pattern: '\b(\d{3}-\d{2}-\d{4})\b|(XXX-XX-\d{4})'
     group: 0
   
+  # Try to extract SSN_LAST_FOUR directly (if only last 4 available)
+  - type: regex_extract
+    variable: SSN_LAST_FOUR
+    from_text: true
+    pattern: '(?:SSN|Social Security).*?(\d{4})(?!\d)'
+    group: 1
+  
   # Try to extract name (uppercase format like in real W2s)
   - type: regex_extract
     variable: FULL_NAME
@@ -63,7 +71,7 @@ actions:
     pattern: '(?:Employee.*?name|name).*?:\s*[A-Z][a-z]+\s+([A-Z][a-z]+)'
     group: 1
   
-  # Derive last four digits of SSN if captured
+  # Derive SSN_LAST_FOUR from full SSN if SSN is available and SSN_LAST_FOUR wasn't extracted
   - type: derive
     variable: SSN_LAST_FOUR
     from: SSN

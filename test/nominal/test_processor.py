@@ -24,7 +24,8 @@ class TestRuleParser:
             'description': 'Test form',
             'variables': {
                 'global': ['FIRST_NAME', 'LAST_NAME'],
-                'local': ['FORM_NAME']
+                'local': ['FORM_NAME'],
+                'derived': []
             },
             'criteria': [
                 {
@@ -45,10 +46,11 @@ class TestRuleParser:
         parser = RuleParser()
         rule = parser.parse_dict(rule_data)
         
-        assert rule.form_name == 'W2'
+        assert rule.rule_id == 'W2'
         assert rule.description == 'Test form'
-        assert 'FIRST_NAME' in rule.variables['global']
-        assert 'FORM_NAME' in rule.variables['local']
+        assert 'FIRST_NAME' in rule.global_variables
+        assert 'FORM_NAME' in rule.local_variables
+        assert len(rule.derived_variables) == 0
         assert len(rule.criteria) == 1
         assert len(rule.actions) == 1
     
@@ -125,8 +127,12 @@ class TestCriterion:
             case_sensitive=True
         )
         
-        assert criterion.match('This is Form W-2') is True
-        assert criterion.match('This is form w-2') is False
+        matches, captured = criterion.match('This is Form W-2')
+        assert matches is True
+        assert captured == {}
+        
+        matches, captured = criterion.match('This is form w-2')
+        assert matches is False
     
     def test_contains_case_insensitive(self):
         """Test case-insensitive contains evaluation."""
@@ -135,9 +141,14 @@ class TestCriterion:
             case_sensitive=False
         )
         
-        assert criterion.match('This is Form W-2') is True
-        assert criterion.match('This is form w-2') is True
-        assert criterion.match('This is FORM W-2') is True
+        matches, _ = criterion.match('This is Form W-2')
+        assert matches is True
+        
+        matches, _ = criterion.match('This is form w-2')
+        assert matches is True
+        
+        matches, _ = criterion.match('This is FORM W-2')
+        assert matches is True
     
     def test_regex_criterion(self):
         """Test regex evaluation."""
@@ -145,8 +156,12 @@ class TestCriterion:
             pattern=r'\d{3}-\d{2}-\d{4}'
         )
         
-        assert criterion.match('SSN: 123-45-6789') is True
-        assert criterion.match('SSN: 12-345-6789') is False
+        matches, captured = criterion.match('SSN: 123-45-6789')
+        assert matches is True
+        assert captured == {}
+        
+        matches, _ = criterion.match('SSN: 12-345-6789')
+        assert matches is False
     
     def test_regex_with_capture(self):
         """Test regex evaluation with capture."""
@@ -156,10 +171,10 @@ class TestCriterion:
             variable='SSN'
         )
         
-        result = criterion.match('SSN: 123-45-6789')
+        matches, captured = criterion.match('SSN: 123-45-6789')
         
-        assert result is True
-        assert criterion.captured_values['SSN'] == '123-45-6789'
+        assert matches is True
+        assert captured['SSN'] == '123-45-6789'
     
     def test_all_criterion(self):
         """Test 'all' composite criterion."""
@@ -170,8 +185,11 @@ class TestCriterion:
         
         criterion = AllCriterion(sub_criteria=sub_criteria)
         
-        assert criterion.match('test1 and test2') is True
-        assert criterion.match('test1 only') is False
+        matches, _ = criterion.match('test1 and test2')
+        assert matches is True
+        
+        matches, _ = criterion.match('test1 only')
+        assert matches is False
     
     def test_any_criterion(self):
         """Test 'any' composite criterion."""
@@ -182,9 +200,14 @@ class TestCriterion:
         
         criterion = AnyCriterion(sub_criteria=sub_criteria)
         
-        assert criterion.match('test1 only') is True
-        assert criterion.match('test2 only') is True
-        assert criterion.match('neither') is False
+        matches, _ = criterion.match('test1 only')
+        assert matches is True
+        
+        matches, _ = criterion.match('test2 only')
+        assert matches is True
+        
+        matches, _ = criterion.match('neither')
+        assert matches is False
 
 
 class TestAction:
@@ -275,7 +298,8 @@ class TestNominalProcessor:
             'description': 'Test W2',
             'variables': {
                 'global': ['SSN'],
-                'local': ['FORM_NAME']
+                'local': ['FORM_NAME'],
+                'derived': ['SSN_LAST_FOUR']  # SSN_LAST_FOUR is derived
             },
             'criteria': [
                 {
@@ -319,10 +343,10 @@ class TestNominalProcessor:
         result = processor.process_document(document)
         
         assert result is not None
-        assert result['form_name'] == 'W2'
-        assert result['variables']['FORM_NAME'] == 'W2'
-        assert result['variables']['SSN'] == '123-45-6789'
-        assert result['variables']['SSN_LAST_FOUR'] == '6789'
+        assert result['rule_id'] == 'W2'
+        assert result['local_variables']['FORM_NAME'] == 'W2'
+        assert result['global_variables']['SSN'] == '123-45-6789'
+        assert result['derived_variables']['SSN_LAST_FOUR'] == '6789'
     
     def test_process_document_no_match(self):
         """Test processing a document that doesn't match any rule."""
@@ -332,7 +356,11 @@ class TestNominalProcessor:
         rule_data = {
             'form_name': 'W2',
             'description': 'Test W2',
-            'variables': {'global': [], 'local': []},
+            'variables': {
+                'global': [],
+                'local': [],
+                'derived': []
+            },
             'criteria': [
                 {
                     'type': 'contains',
@@ -363,6 +391,7 @@ description: Test form
 variables:
   global: []
   local: []
+  derived: []
 criteria:
   - type: contains
     value: test
@@ -381,7 +410,7 @@ actions:
             processor.load_rule(temp_path)
             
             assert len(processor.rules) == 1
-            assert processor.rules[0].form_name == 'TEST'
+            assert processor.rules[0].rule_id == 'TEST'
         finally:
             os.unlink(temp_path)
 

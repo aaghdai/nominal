@@ -9,7 +9,7 @@ from tax documents based on configurable rules.
 from .enums import VariableScope, CriterionType, ActionType
 
 # Variables
-from .variable import Variable, GlobalVariable, LocalVariable
+from .variable import Variable, GlobalVariable, LocalVariable, DerivedVariable
 
 # Criteria
 from .criterion import (
@@ -38,6 +38,9 @@ from .parser import RuleParser
 # Main processor
 from .processor import NominalProcessor
 
+# Logging (imported from parent package)
+from nominal.logging_config import setup_logger, get_logger, set_log_level, configure_logging
+
 __all__ = [
     # Enums
     'VariableScope',
@@ -47,6 +50,7 @@ __all__ = [
     'Variable',
     'GlobalVariable',
     'LocalVariable',
+    'DerivedVariable',
     # Criteria
     'Criterion',
     'ContainsCriterion',
@@ -65,5 +69,10 @@ __all__ = [
     'RuleParser',
     # Main processor
     'NominalProcessor',
+    # Logging
+    'setup_logger',
+    'get_logger',
+    'set_log_level',
+    'configure_logging',
 ]
 

@@ -51,17 +51,17 @@ class TestProcessorIntegration:
         result = processor.process_document(w2_text)
         
         assert result is not None, "W2 form should be recognized"
-        assert result['form_name'] == 'W2'
-        assert 'FORM_NAME' in result['variables']
-        assert result['variables']['FORM_NAME'] == 'W2'
+        assert result['rule_id'] == 'W2'
+        assert 'FORM_NAME' in result['local_variables']
+        assert result['local_variables']['FORM_NAME'] == 'W2'
         
-        # Check that SSN was captured
-        if 'SSN' in result['variables']:
-            assert result['variables']['SSN'] == '123-45-6789'
+        # Check that SSN was captured as global variable
+        if 'SSN' in result['global_variables']:
+            assert result['global_variables']['SSN'] == '123-45-6789'
         
         # Check that last four digits were derived
-        if 'SSN_LAST_FOUR' in result['variables']:
-            assert result['variables']['SSN_LAST_FOUR'] == '6789'
+        if 'SSN_LAST_FOUR' in result['derived_variables']:
+            assert result['derived_variables']['SSN_LAST_FOUR'] == '6789'
     
     def test_non_w2_form_not_recognized(self, processor):
         """Test that non-W2 forms are not matched by W2 rule."""
@@ -77,7 +77,7 @@ class TestProcessorIntegration:
         # Should be None if only W2 rule is loaded and this isn't a W2
         # Or should match a different form if other rules exist
         if result is not None:
-            assert result['form_name'] != 'W2'
+            assert result['rule_id'] != 'W2'
     
     def test_process_real_w2_pdf(self, processor):
         """Test processing a real W2 PDF file."""
@@ -97,8 +97,8 @@ class TestProcessorIntegration:
         
         # The result should recognize it as a W2
         assert result is not None, "Real W2 PDF should be recognized"
-        assert result['form_name'] == 'W2'
-        assert 'FORM_NAME' in result['variables']
+        assert result['rule_id'] == 'W2'
+        assert 'FORM_NAME' in result['local_variables']
     
     def test_processor_without_rules(self):
         """Test processor behavior when no rules are loaded."""
@@ -126,5 +126,5 @@ class TestProcessorIntegration:
         
         # Should match a rule
         assert result is not None
-        assert 'form_name' in result
+        assert 'rule_id' in result
 

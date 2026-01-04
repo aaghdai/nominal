@@ -9,6 +9,9 @@ from .rule import Rule
 from .criterion import Criterion, ContainsCriterion, RegexCriterion, AllCriterion, AnyCriterion
 from .action import Action, SetAction, RegexExtractAction, DeriveAction, ExtractAction
 from .enums import CriterionType, ActionType
+from nominal.logging_config import setup_logger
+
+logger = setup_logger('nominal.processor.parser')
 
 
 class RuleParser:
@@ -16,12 +19,19 @@ class RuleParser:
     
     def parse_file(self, rule_path: str) -> Rule:
         """Parse a YAML rule file."""
+        logger.info(f"Parsing rule file: {rule_path}")
+        
         path = Path(rule_path)
         if not path.exists():
+            logger.error(f"Rule file not found: {rule_path}")
             raise FileNotFoundError(f"Rule file not found: {rule_path}")
         
-        with open(path, 'r') as f:
-            data = yaml.safe_load(f)
+        try:
+            with open(path, 'r') as f:
+                data = yaml.safe_load(f)
+        except yaml.YAMLError as e:
+            logger.error(f"Invalid YAML in rule file {rule_path}: {e}")
+            raise ValueError(f"Invalid YAML in rule file {rule_path}: {e}")
         
         return self.parse_dict(data)
     
@@ -31,18 +41,44 @@ class RuleParser:
         required_fields = ['form_name', 'variables', 'criteria', 'actions']
         for field in required_fields:
             if field not in data:
+                logger.error(f"Missing required field in rule: {field}")
                 raise ValueError(f"Missing required field: {field}")
         
+        rule_id = data['form_name']
+        logger.debug(f"Parsing rule: {rule_id}")
+        
+        # Parse variables
+        variables = data['variables']
+        global_vars = variables.get('global', [])
+        local_vars = variables.get('local', [])
+        derived_vars = variables.get('derived', [])
+        
+        logger.debug(f"Rule {rule_id} variables: global={len(global_vars)}, local={len(local_vars)}, derived={len(derived_vars)}")
+        
         # Parse criteria
-        criteria = [self._parse_criterion(c) for c in data['criteria']]
+        try:
+            criteria = [self._parse_criterion(c) for c in data['criteria']]
+            logger.debug(f"Parsed {len(criteria)} criteria for rule {rule_id}")
+        except Exception as e:
+            logger.error(f"Error parsing criteria for rule {rule_id}: {e}")
+            raise
         
         # Parse actions
-        actions = [self._parse_action(a) for a in data['actions']]
+        try:
+            actions = [self._parse_action(a) for a in data['actions']]
+            logger.debug(f"Parsed {len(actions)} actions for rule {rule_id}")
+        except Exception as e:
+            logger.error(f"Error parsing actions for rule {rule_id}: {e}")
+            raise
+        
+        logger.info(f"✓ Successfully parsed rule: {rule_id}")
         
         return Rule(
-            form_name=data['form_name'],
+            rule_id=rule_id,  # Use form_name as rule_id
             description=data.get('description', ''),
-            variables=data['variables'],
+            global_variables=global_vars,
+            local_variables=local_vars,
+            derived_variables=derived_vars,
             criteria=criteria,
             actions=actions
         )
