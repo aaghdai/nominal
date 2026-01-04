@@ -270,7 +270,6 @@ nominal/
 ├── tools/                     # Development tools
 │   ├── validate_rules.py      # Rule validation tool
 │   └── README.md
-├── test_input/                # Sample input files for testing
 ├── .env.example               # Environment variables template
 ├── CHANGELOG.md               # Project changelog
 ├── PLAN.md                    # Project roadmap
