@@ -2,6 +2,7 @@
 Rule validation for Nominal processor.
 
 Validates rule files to ensure they conform to the expected schema and structure.
+Supports both global rules (rule_name) and form rules (form_name).
 """
 
 from pathlib import Path
@@ -19,39 +20,11 @@ logger = setup_logger()
 class RuleValidator:
     """Validates rule files against schema and consistency requirements."""
 
-    def __init__(self, global_vars_schema_path: str | None = None):
-        """Initialize validator with optional global variables schema."""
-        self.global_vars_schema_path = global_vars_schema_path
-        self.global_variables: set[str] = set()
+    def __init__(self):
+        """Initialize validator."""
         self.parser = RuleParser()
         self.errors: list[str] = []
         self.warnings: list[str] = []
-
-    def load_global_variables_schema(self) -> None:
-        """Load global variables schema from file."""
-        if not self.global_vars_schema_path:
-            self.warnings.append(
-                "No global variables schema specified, " "skipping global var validation"
-            )
-            return
-
-        schema_path = Path(self.global_vars_schema_path)
-        if not schema_path.exists():
-            self.errors.append(f"Global variables schema file not found: {schema_path}")
-            return
-
-        try:
-            with open(schema_path) as f:
-                data = yaml.safe_load(f)
-
-            if "global_variables" not in data:
-                self.errors.append("Global variables schema missing 'global_variables' key")
-                return
-
-            self.global_variables = set(data["global_variables"])
-            print(f"✓ Loaded {len(self.global_variables)} global variables from schema")
-        except Exception as e:
-            self.errors.append(f"Failed to load global variables schema: {e}")
 
     def validate_rule_file(self, rule_path: str) -> bool:
         """Validate a single rule file."""
@@ -70,8 +43,14 @@ class RuleValidator:
             self.errors.append(f"{path.name}: Invalid YAML syntax: {e}")
             return False
 
+        # Validate required identifier (either form_name or rule_name)
+        rule_id = data.get("form_name") or data.get("rule_name")
+        if not rule_id:
+            self.errors.append(f"{path.name}: Missing required field: 'form_name' or 'rule_name'")
+            return False
+
         # Validate required fields
-        required_fields = ["form_name", "variables", "criteria", "actions"]
+        required_fields = ["criteria", "actions"]
         for field in required_fields:
             if field not in data:
                 self.errors.append(f"{path.name}: Missing required field: {field}")
@@ -79,23 +58,14 @@ class RuleValidator:
 
         # Validate rule structure using parser
         try:
-            self.parser.parse_dict(data)  # Validate structure, result not needed
+            self.parser.parse_dict(data)
         except Exception as e:
             self.errors.append(f"{path.name}: Failed to parse rule: {e}")
             return False
 
-        # Validate global variables against schema
-        if self.global_variables:
-            rule_global_vars = set(data["variables"].get("global", []))
-            invalid_vars = rule_global_vars - self.global_variables
-            if invalid_vars:
-                invalid_list = ", ".join(invalid_vars)
-                self.errors.append(
-                    f"{path.name}: Invalid global variables (not in schema): " f"{invalid_list}"
-                )
-
-        # Validate variable usage in actions
-        self._validate_variable_usage(path.name, data)
+        # Validate variable usage in actions (if variables are declared)
+        if "variables" in data:
+            self._validate_variable_usage(path.name, data)
 
         # Validate criteria structure
         self._validate_criteria(path.name, data.get("criteria", []))
@@ -103,10 +73,11 @@ class RuleValidator:
         # Validate actions structure
         self._validate_actions(path.name, data.get("actions", []))
 
-        print(f"  ✓ Rule ID: {data['form_name']}")
-        print(f"  ✓ Global variables: {len(data['variables'].get('global', []))}")
-        print(f"  ✓ Local variables: {len(data['variables'].get('local', []))}")
-        print(f"  ✓ Derived variables: {len(data['variables'].get('derived', []))}")
+        print(f"  ✓ Rule ID: {rule_id}")
+        if "variables" in data:
+            print(f"  ✓ Global variables: {len(data['variables'].get('global', []))}")
+            print(f"  ✓ Local variables: {len(data['variables'].get('local', []))}")
+            print(f"  ✓ Derived variables: {len(data['variables'].get('derived', []))}")
         print(f"  ✓ Criteria: {len(data.get('criteria', []))}")
         print(f"  ✓ Actions: {len(data.get('actions', []))}")
 
@@ -115,14 +86,15 @@ class RuleValidator:
     def _validate_variable_usage(self, rule_name: str, data: dict[str, Any]) -> None:
         """Validate that variables used in actions are declared."""
         declared_vars = set()
-        declared_vars.update(data["variables"].get("global", []))
-        declared_vars.update(data["variables"].get("local", []))
-        declared_vars.update(data["variables"].get("derived", []))
+        if "variables" in data:
+            declared_vars.update(data["variables"].get("global", []))
+            declared_vars.update(data["variables"].get("local", []))
+            declared_vars.update(data["variables"].get("derived", []))
 
         for action in data.get("actions", []):
             if "variable" in action:
                 var_name = action["variable"]
-                if var_name not in declared_vars:
+                if declared_vars and var_name not in declared_vars:
                     self.warnings.append(
                         f"{rule_name}: Action uses undeclared variable: {var_name}"
                     )
@@ -130,7 +102,7 @@ class RuleValidator:
             # Check derive action source variable
             if action.get("type") == "derive" and "from" in action:
                 source_var = action["from"]
-                if source_var not in declared_vars:
+                if declared_vars and source_var not in declared_vars:
                     self.warnings.append(
                         f"{rule_name}: Derive action references undeclared "
                         f"source variable: {source_var}"
@@ -164,19 +136,17 @@ class RuleValidator:
                 self.warnings.append(f"{rule_name}: Action {i} missing 'variable' field")
 
     def validate_directory(self, rules_dir: str) -> bool:
-        """Validate all rule files in a directory."""
+        """
+        Validate all rule files in a directory.
+        Supports both flat structure and global/forms subdirectories.
+        """
         rules_path = Path(rules_dir)
         if not rules_path.exists():
             self.errors.append(f"Rules directory not found: {rules_dir}")
             return False
 
-        # Load global variables schema if provided
-        if self.global_vars_schema_path:
-            self.load_global_variables_schema()
-
-        # Find all YAML files
-        yaml_files = list(rules_path.glob("*.yaml")) + list(rules_path.glob("*.yml"))
-        yaml_files = [f for f in yaml_files if f.name != "global-variables.yaml"]
+        # Find all YAML files (including in subdirectories)
+        yaml_files = list(rules_path.rglob("*.yaml")) + list(rules_path.rglob("*.yml"))
 
         if not yaml_files:
             self.errors.append(f"No rule files found in {rules_dir}")

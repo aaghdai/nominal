@@ -1,63 +1,76 @@
 #!/usr/bin/env python3
 """
-Rule validation tool for Nominal processor.
+Rule Validation Tool
 
-Validates rule files to ensure they conform to the expected schema and structure.
-This is a thin wrapper around the RuleValidator class from the nominal package.
+Validates rule files in the rules/ directory to ensure they conform
+to the expected schema and structure.
+
+Usage:
+    python tools/validate_rules.py [rules_directory]
+
+If no rules directory is specified, defaults to 'rules/' in the project root.
+
+Exit codes:
+    0: Validation passed
+    1: Validation failed
 """
 
 import argparse
 import sys
 from pathlib import Path
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / "src"))
-
-from nominal.rules import RuleValidator  # noqa: E402
+from nominal.rules import RuleValidator
 
 
 def main():
-    """Main entry point for rule validation."""
-    parser = argparse.ArgumentParser(description="Validate Nominal processor rule files")
+    parser = argparse.ArgumentParser(
+        description="Validate Nominal rule files",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    %(prog)s                    # Validate rules in default location (rules/)
+    %(prog)s rules/             # Validate all rules in rules directory
+    %(prog)s rules/forms/       # Validate only form rules
+    %(prog)s rules/global/      # Validate only global rules
+""",
+    )
+
     parser.add_argument(
         "rules_dir",
-        type=str,
-        help="Directory containing rule files to validate",
-    )
-    parser.add_argument(
-        "--schema",
-        type=str,
+        nargs="?",
         default=None,
-        help="Path to global variables schema file (default: rules_dir/global-variables.yaml)",
-    )
-    parser.add_argument(
-        "--file",
-        type=str,
-        default=None,
-        help="Validate a single rule file instead of a directory",
+        help="Directory containing rule files (default: rules/)",
     )
 
     args = parser.parse_args()
 
-    # Determine schema path
-    if args.schema:
-        schema_path = args.schema
+    # Determine rules directory
+    if args.rules_dir:
+        rules_dir = Path(args.rules_dir)
     else:
-        rules_path = Path(args.rules_dir)
-        schema_path = str(rules_path / "global-variables.yaml")
+        # Find project root (look for pyproject.toml)
+        current = Path.cwd()
+        while current != current.parent:
+            if (current / "pyproject.toml").exists():
+                break
+            current = current.parent
+        rules_dir = current / "rules"
 
-    validator = RuleValidator(global_vars_schema_path=schema_path)
+    if not rules_dir.exists():
+        print(f"Error: Rules directory not found: {rules_dir}")
+        sys.exit(1)
 
-    # Validate
-    if args.file:
-        validator.load_global_variables_schema()
-        success = validator.validate_rule_file(args.file)
-    else:
-        success = validator.validate_directory(args.rules_dir)
+    print(f"Validating rules in: {rules_dir}")
+    print("=" * 60)
 
+    # Create validator and run validation
+    validator = RuleValidator()
+    success = validator.validate_directory(str(rules_dir))
+
+    # Print summary
     validator.print_summary()
 
+    # Exit with appropriate code
     sys.exit(0 if success and not validator.errors else 1)
 
 

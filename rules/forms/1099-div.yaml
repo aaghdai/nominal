@@ -1,0 +1,34 @@
+# IRS Form 1099-DIV - Dividends and Distributions
+form_name: 1099-DIV
+description: IRS Form 1099-DIV - Dividends and Distributions
+
+# Classification criteria - determines if document is a 1099-DIV
+criteria:
+  # Must contain "1099-DIV" or "1099DIV"
+  - type: regex
+    pattern: '(?i)1099-?div'
+    description: "Document must contain 1099-DIV"
+
+  # And at least one of the following
+  - type: any
+    criteria:
+      # Has dividends text
+      - type: regex
+        pattern: '(?i)dividends?\s+and\s+distributions?'
+        description: "Contains 'Dividends and Distributions'"
+
+      # Has dividend-specific keywords
+      - type: all
+        criteria:
+          - type: regex
+            pattern: '(?i)(ordinary|qualified)\s+dividends?'
+            description: "Contains ordinary or qualified dividends"
+          - type: regex
+            pattern: '(?i)(payer|recipient)'
+            description: "Contains payer or recipient"
+
+actions:
+  # Set the form name (local variable)
+  - type: set
+    variable: FORM_NAME
+    value: "1099-DIV"

@@ -1,0 +1,34 @@
+# IRS Form 1099-MISC - Miscellaneous Information
+form_name: 1099-MISC
+description: IRS Form 1099-MISC - Miscellaneous Information
+
+# Classification criteria - determines if document is a 1099-MISC
+criteria:
+  # Must contain "1099-MISC" or "1099MISC"
+  - type: regex
+    pattern: '(?i)1099-?misc'
+    description: "Document must contain 1099-MISC"
+
+  # And at least one of the following
+  - type: any
+    criteria:
+      # Has miscellaneous income text
+      - type: regex
+        pattern: '(?i)miscellaneous\s+(income|information)'
+        description: "Contains 'Miscellaneous Income/Information'"
+
+      # Has 1099-MISC specific fields
+      - type: all
+        criteria:
+          - type: regex
+            pattern: '(?i)(rents|royalties|other\s+income|nonemployee\s+compensation)'
+            description: "Contains 1099-MISC specific income types"
+          - type: regex
+            pattern: '(?i)(payer|recipient)'
+            description: "Contains payer or recipient"
+
+actions:
+  # Set the form name (local variable)
+  - type: set
+    variable: FORM_NAME
+    value: "1099-MISC"

@@ -1,0 +1,34 @@
+# IRS Form W-2 - Wage and Tax Statement
+form_name: W2
+description: IRS Form W-2 - Wage and Tax Statement
+
+# Classification criteria - determines if document is a W-2
+criteria:
+  # Must contain "w-2" or "w2" text
+  - type: regex
+    pattern: '(?i)w-?2'
+    description: "Document must contain W-2 or W2"
+
+  # And at least one of the following
+  - type: any
+    criteria:
+      # Has wage/tax statement text
+      - type: regex
+        pattern: '(?i)wage\s+and\s+tax\s+statement'
+        description: "Contains 'Wage and Tax Statement'"
+
+      # Has employer/employee keywords with form context
+      - type: all
+        criteria:
+          - type: regex
+            pattern: '(?i)(employer|employee)'
+            description: "Contains employer or employee"
+          - type: regex
+            pattern: '(?i)(wages|compensation|tips)'
+            description: "Contains wages, compensation, or tips"
+
+actions:
+  # Set the form name (local variable)
+  - type: set
+    variable: FORM_NAME
+    value: "W2"

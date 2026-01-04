@@ -1,5 +1,9 @@
 """
 Parser for YAML rule files.
+
+Supports two types of rules:
+- Global rules: Use 'rule_name' field, extract common variables
+- Form rules: Use 'form_name' field, classify documents
 """
 
 from pathlib import Path
@@ -10,7 +14,13 @@ import yaml
 from nominal.logging import setup_logger
 
 from .action import Action, DeriveAction, ExtractAction, RegexExtractAction, SetAction
-from .criterion import AllCriterion, AnyCriterion, ContainsCriterion, Criterion, RegexCriterion
+from .criterion import (
+    AllCriterion,
+    AnyCriterion,
+    ContainsCriterion,
+    Criterion,
+    RegexCriterion,
+)
 from .enums import ActionType, CriterionType
 from .rule import Rule
 
@@ -40,18 +50,23 @@ class RuleParser:
 
     def parse_dict(self, data: dict[str, Any]) -> Rule:
         """Parse a dictionary into a Rule object."""
+        # Get rule identifier (form_name for forms, rule_name for global rules)
+        rule_id = data.get("form_name") or data.get("rule_name")
+        if not rule_id:
+            logger.error("Rule must have either 'form_name' or 'rule_name' field")
+            raise ValueError("Rule must have either 'form_name' or 'rule_name' field")
+
         # Validate required fields
-        required_fields = ["form_name", "variables", "criteria", "actions"]
+        required_fields = ["criteria", "actions"]
         for field in required_fields:
             if field not in data:
-                logger.error(f"Missing required field in rule: {field}")
+                logger.error(f"Missing required field in rule {rule_id}: {field}")
                 raise ValueError(f"Missing required field: {field}")
 
-        rule_id = data["form_name"]
         logger.debug(f"Parsing rule: {rule_id}")
 
-        # Parse variables
-        variables = data["variables"]
+        # Parse variables (optional for global rules)
+        variables = data.get("variables", {})
         global_vars = variables.get("global", [])
         local_vars = variables.get("local", [])
         derived_vars = variables.get("derived", [])
@@ -80,7 +95,7 @@ class RuleParser:
         logger.info(f"✓ Successfully parsed rule: {rule_id}")
 
         return Rule(
-            rule_id=rule_id,  # Use form_name as rule_id
+            rule_id=rule_id,
             description=data.get("description", ""),
             global_variables=global_vars,
             local_variables=local_vars,
