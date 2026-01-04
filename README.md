@@ -166,8 +166,26 @@ uv run pytest --cov=nominal --cov-report=html
 
 ```bash
 # Run the processor example
-uv run python example_processor.py
+uv run python examples/example_processor.py
 ```
+
+### Updating Changelog Statistics
+
+Before making a commit, update the statistics section in `CHANGELOG.md`:
+
+```bash
+# Run the statistics update script
+./scripts/update_changelog_stats.sh
+```
+
+This script automatically calculates and updates:
+- Source code line counts
+- Test code line counts
+- Documentation line counts
+- File counts by category
+- Test counts
+
+The script uses `uv` and `pytest` to gather accurate metrics, so ensure dependencies are installed.
 
 ## Roadmap
 

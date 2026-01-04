@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **Project-level logging system** (`src/nominal/logging_config.py`)
+  - Colored logging output (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  - Configurable log levels per component (reader, processor)
+  - `configure_logging()` function for centralized configuration
+  - Comprehensive logging throughout all components
+  - Logging documentation in `docs/logging/README.md`
+
+- **Code quality tools**
+  - Ruff linter and formatter integration
+  - Pre-commit hooks for automatic code formatting
+  - Git hooks that run on every commit
+  - Automated import sorting and code style enforcement
+
+- **Examples directory** (`examples/`)
+  - `example_processor.py`: Core processor usage examples
+  - `example_logging.py`: Logging level demonstrations
+  - `example_project_logging.py`: Project-level logging configuration
+  - `README.md`: Examples documentation
+
+### Changed
+- **Processor refactoring**
+  - Split `processor.py` into modular package structure
+  - Separated enums, base classes, implementations, parser, and evaluator
+  - Improved code organization and maintainability
+
+- **Project organization**
+  - Moved example scripts to dedicated `examples/` directory
+  - Moved logging documentation to `docs/logging/` directory
+  - Updated all path references to work from new locations
+
+- **Test improvements**
+  - Removed unnecessary `sys.path` manipulation from test files
+  - Removed `# noqa: E402` tags (no longer needed)
+  - Cleaner test code following best practices
+  - All tests work with package installed in editable mode
+
+- **Code quality**
+  - Fixed all linting issues (line length, import ordering, unused imports)
+  - Enforced 100-character line length limit
+  - Consistent code formatting across entire codebase
+  - All code passes ruff checks
+
+### Technical Details
+- Ruff configuration in `pyproject.toml`
+- Pre-commit hooks configured in `.pre-commit-config.yaml`
+- Automatic code formatting on git commit
+- Project-level logging configuration
+
 ## [0.2.0] - 2026-01-03
 
 ### Added - Milestone 2: Nominal Processor
@@ -170,6 +221,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Version History
 
+- **Unreleased**: Logging system, code quality tools, refactoring improvements
 - **0.2.0** (2026-01-03): Processor implementation (Milestone 2) ✅
 - **0.1.0** (2025-12-XX): Reader implementation (Milestone 1) ✅
 - **0.0.0** (Initial): Project setup
@@ -179,9 +231,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Statistics
 
 ### Code
-- **Total Lines**: ~365 (processor) + 79 (reader) = 444 lines of core code
-- **Test Lines**: ~650+ lines across all test files
-- **Documentation**: 1000+ lines across multiple files
+- **Source Code**: 1266 lines across all modules
+  - Reader module: ~119 lines
+  - Processor package: ~937 lines (8 modules: enums, variable, criterion, action, rule, parser, processor, logging_config)
+  - Main package: ~210 lines
+- **Test Code**: 616 lines across all test files
+- **Documentation**: 1280 lines across multiple files
+  - Architecture and design docs
+  - API reference and usage guides
+  - Logging documentation
+  - Examples and tutorials
 
 ### Test Coverage
 - **Unit Tests**: 24 tests
@@ -190,13 +249,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Pass Rate**: 100%
 
 ### Files Created/Modified
-- Core modules: 2 (reader.py, processor.py)
-- Rule files: 2 (w2.yaml, 1099-misc.yaml)
-- Test files: 4
-- Documentation files: 5
-- Example files: 1
-- Configuration files: 2
-- **Total**: 16+ files
+- **Core modules**: 12 Python files
+  - Reader: 1 file
+  - Processor package: 8 files (enums, variable, criterion, action, rule, parser, processor, logging_config)
+  - Package init: 2 files
+  - Main: 1 file
+- **Rule files**: 2 YAML files (w2.yaml, 1099-misc.yaml)
+- **Test files**: 6 test modules
+- **Documentation files**: 4 markdown files
+  - Architecture documentation
+  - Processor documentation
+  - Logging documentation
+  - Milestone summaries
+- **Example files**: 3 Python scripts + README
+- **Configuration files**: 3 files (pyproject.toml, .pre-commit-config.yaml, .gitignore)
+- **Total**: 31+ files
 
 ### Features Implemented
 - PDF reading: ✅
@@ -204,7 +271,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Rule parsing: ✅
 - Pattern matching: ✅
 - Variable extraction: ✅
+- Variable derivation: ✅
 - Batch processing: ✅
+- Logging system: ✅
+- Code quality tools: ✅
 - Comprehensive testing: ✅
 - Full documentation: ✅
 
@@ -227,6 +297,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PyYAML (rule parsing)
 - Pytest (testing)
 - UV (package management)
+- Ruff (linting and formatting)
+- Pre-commit (git hooks)
 
 ---
 
