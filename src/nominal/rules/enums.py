@@ -1,16 +1,8 @@
 """
-Enumerations for the processor package.
+Enumerations for the rules package.
 """
 
 from enum import StrEnum
-
-
-class VariableScope(StrEnum):
-    """Variable scope enumeration."""
-
-    GLOBAL = "global"
-    LOCAL = "local"
-    DERIVED = "derived"  # Variables that can be computed from other variables
 
 
 class CriterionType(StrEnum):

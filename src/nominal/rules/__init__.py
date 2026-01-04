@@ -6,7 +6,6 @@ This package contains all rule-related functionality including:
 - Rule parsing from YAML
 - Rule validation
 - Actions and criteria
-- Variables
 """
 
 
@@ -24,17 +23,11 @@ from .criterion import (
     Criterion,
     RegexCriterion,
 )
-from .enums import ActionType, CriterionType, VariableScope
+from .enums import ActionType, CriterionType
 from .manager import RulesManager
 from .parser import RuleParser
 from .rule import Rule
 from .validator import RuleValidator
-from .variable import (
-    DerivedVariable,
-    GlobalVariable,
-    LocalVariable,
-    Variable,
-)
 
 __all__ = [
     # Manager
@@ -44,12 +37,6 @@ __all__ = [
     "RuleParser",
     # Validator
     "RuleValidator",
-    # Variables
-    "Variable",
-    "GlobalVariable",
-    "LocalVariable",
-    "DerivedVariable",
-    "VariableScope",
     # Criteria
     "Criterion",
     "ContainsCriterion",
