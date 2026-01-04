@@ -317,22 +317,33 @@ The script uses `uv` and `pytest` to gather accurate metrics, so ensure dependen
 
 ## Roadmap
 
-### ✅ Milestone 1: Implement the Reader
-- PDF text extraction
-- OCR fallback for image-based PDFs
-- Basic error handling
+### ✅ Milestone 1: Implement the Reader (COMPLETED)
+- ✅ PDF text extraction
+- ✅ OCR fallback for image-based PDFs
+- ✅ Configurable OCR threshold
+- ✅ Basic error handling
 
-### ✅ Milestone 2: Process a Batch of PDF Files
-- YAML-based rule DSL
-- Pattern matching and criteria evaluation
-- Variable extraction and transformation
-- Batch processing support
+### ✅ Milestone 2: Process a Batch of PDF Files (COMPLETED)
+- ✅ YAML-based rule DSL
+- ✅ Pattern matching and criteria evaluation
+- ✅ Variable extraction and transformation
+- ✅ Batch processing support
+- ✅ Global and local variable scoping
 
-### 🔄 Milestone 3: Implement Orchestrator *(In Progress)*
-- File renaming based on extracted variables
-- Batch directory processing
-- Error logging
-- Output path management
+### ✅ Milestone 3: Implement Orchestrator (COMPLETED)
+- ✅ File renaming based on extracted variables
+- ✅ Batch directory processing
+- ✅ Error logging and unmatched file tracking
+- ✅ Output path management
+- ✅ CLI interface (`nominal` command)
+
+### ✅ Milestone 4: Advanced Features (COMPLETED)
+- ✅ Orchestrator-level derived variables
+- ✅ Pattern validation against declared variables
+- ✅ Advanced CLI (`nominal-derived` command)
+- ✅ Built-in derivation functions (LAST_NAME, FIRST_NAME, etc.)
+
+**All core features are now complete!** The system can read PDFs, identify forms, extract variables, compute derived values, and automatically rename files. See [PLAN.md](PLAN.md) for detailed implementation notes.
 
 ## Requirements
 
