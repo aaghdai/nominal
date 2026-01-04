@@ -50,7 +50,7 @@ class RuleValidator:
             return False
 
         # Validate required fields
-        required_fields = ["criteria", "actions"]
+        required_fields = ["criteria", "actions", "variables"]
         for field in required_fields:
             if field not in data:
                 self.errors.append(f"{path.name}: Missing required field: {field}")

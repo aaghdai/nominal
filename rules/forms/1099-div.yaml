@@ -2,6 +2,10 @@
 rule_id: 1099-DIV
 description: IRS Form 1099-DIV - Dividends and Distributions
 
+variables:
+  local:
+    - FORM_NAME
+
 # Classification criteria - determines if document is a 1099-DIV
 criteria:
   # Must contain "1099-DIV" or "1099DIV"

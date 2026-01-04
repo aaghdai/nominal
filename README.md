@@ -89,8 +89,17 @@ Identifies document types and extracts information using rule files.
 
 [Learn More](docs/processor.md)
 
-### 3. Nominal Orchestrator *(Coming Soon)*
+### 3. Nominal Orchestrator
 Orchestrates the complete workflow: reading, processing, and file renaming.
+
+**Features:**
+- Batch directory processing
+- Pattern-based file renaming
+- Variable validation (ensures pattern uses existing variables)
+- Orchestrator-level derived variables (e.g., extracting last names)
+- Robust error handling and unmatched file tracking
+
+[Learn More](docs/orchestrator.md)
 
 ## Rule Files
 

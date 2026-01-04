@@ -2,6 +2,10 @@
 rule_id: W2
 description: IRS Form W-2 - Wage and Tax Statement
 
+variables:
+  local:
+    - FORM_NAME
+
 # Classification criteria - determines if document is a W-2
 criteria:
   # Must contain "w-2" or "w2" text

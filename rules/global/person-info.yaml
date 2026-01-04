@@ -4,6 +4,13 @@
 rule_id: person-info
 description: Extracts taxpayer/recipient personal information
 
+variables:
+  global:
+    - FULL_NAME
+    - FIRST_NAME
+    - LAST_NAME
+    - TIN_LAST_FOUR
+
 # No criteria - applies to all documents (global extraction)
 criteria:
   - type: regex

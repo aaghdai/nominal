@@ -69,6 +69,54 @@ class TestOrchestrator:
         assert any("W2" in f for f in filenames)
         assert any("1099" in f for f in filenames)
 
+    def test_orchestrator_pattern_validation(self, rules_dir, temp_dirs):
+        """Test that orchestrator validates filename pattern."""
+        input_dir, output_dir = temp_dirs
+        orchestrator = NominalOrchestrator(rules_dir)
+
+        # Pattern with non-existent variable
+        invalid_pattern = "{rule_id}_{NON_EXISTENT_VAR}"
+
+        with pytest.raises(ValueError, match="references undefined variables"):
+            orchestrator.process_directory(
+                str(input_dir), str(output_dir), filename_pattern=invalid_pattern
+            )
+
+    def test_orchestrator_derived_variables(self, rules_dir, fixtures_dir, temp_dirs):
+        """Test orchestrator-level derived variables."""
+        input_dir, output_dir = temp_dirs
+
+        # Copy fixture
+        shutil.copy2(fixtures_dir / "Sample-W2.pdf", input_dir / "w2.pdf")
+
+        # Define orchestrator-level derived variable
+        def derive_last_name(vars):
+            full_name = vars.get("FULL_NAME", "")
+            if full_name:
+                # Simple split for testing
+                parts = full_name.split()
+                return parts[-1] if parts else "UNKNOWN"
+            return "UNKNOWN"
+
+        orchestrator = NominalOrchestrator(
+            rules_dir, derived_variables={"DERIVED_LAST_NAME": derive_last_name}
+        )
+
+        # Pattern uses the derived variable
+        pattern = "{rule_id}_{DERIVED_LAST_NAME}"
+        stats = orchestrator.process_directory(
+            str(input_dir), str(output_dir), filename_pattern=pattern
+        )
+
+        assert stats["matched"] == 1
+        output_files = list(output_dir.glob("*.pdf"))
+        assert len(output_files) == 1
+
+        # Check that the derived variable was used in the filename
+        # Based on previous runs, FULL_NAME for Sample-W2.pdf was "UNIVERSITY OF PITTSBURGH\nX"
+        # So DERIVED_LAST_NAME should be "X"
+        assert "W2_X.pdf" == output_files[0].name
+
     def test_orchestrator_unmatched(self, rules_dir, temp_dirs):
         """Test handling of unmatched files."""
         input_dir, output_dir = temp_dirs

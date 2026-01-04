@@ -2,9 +2,10 @@
 Nominal Orchestrator: Orchestrates the workflow of reading, processing, and renaming files.
 """
 
+import re
 import shutil
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable, Dict, Optional
 
 from nominal.logging import setup_logger
 from nominal.processor import NominalProcessor
@@ -19,13 +20,15 @@ class NominalOrchestrator:
     1. Scan directory for PDF files
     2. Read files using NominalReader
     3. Process text using NominalProcessor
-    4. Rename and move files based on extracted variables
+    4. Apply orchestrator-level derived variables
+    5. Rename and move files based on extracted variables
     """
 
     def __init__(
         self,
         rules_dir: str,
         ocr_fallback: bool = True,
+        derived_variables: Optional[Dict[str, Callable[[Dict[str, Any]], Any]]] = None,
     ):
         """
         Initialize the orchestrator.
@@ -33,9 +36,13 @@ class NominalOrchestrator:
         Args:
             rules_dir: Directory containing rule files
             ocr_fallback: Whether to use OCR if text extraction fails
+            derived_variables: Optional dict of orchestrator-level derived variables.
+                              Map of variable name to a function that takes all
+                              extracted variables and returns the derived value.
         """
         self.reader = NominalReader(ocr_fallback=ocr_fallback)
         self.processor = NominalProcessor(rules_dir)
+        self.orchestrator_derived_vars = derived_variables or {}
         logger.info("NominalOrchestrator initialized")
 
     def process_directory(
@@ -55,6 +62,9 @@ class NominalOrchestrator:
         Returns:
             Dictionary with processing summary
         """
+        # 1. Validate filename pattern against declared variables
+        self._validate_pattern(filename_pattern)
+
         input_path = Path(input_dir)
         output_path = Path(output_dir)
 
@@ -105,6 +115,26 @@ class NominalOrchestrator:
         )
         return stats
 
+    def _validate_pattern(self, pattern: str) -> None:
+        """
+        Validate that all placeholders in the pattern refer to existing variables.
+        """
+        placeholders = re.findall(r"\{(\w+)\}", pattern)
+        declared_vars = self.processor.get_all_declared_variables()
+
+        # Add orchestrator-level derived variables to the set of valid variables
+        available_vars = declared_vars.union(set(self.orchestrator_derived_vars.keys()))
+
+        invalid_placeholders = [p for p in placeholders if p not in available_vars]
+        if invalid_placeholders:
+            error_msg = (
+                f"Filename pattern references undefined variables: "
+                f"{', '.join(invalid_placeholders)}. "
+                f"Available variables: {', '.join(sorted(available_vars))}"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+
     def _write_error_log(self, log_path: Path, message: str):
         """Write an error message to a log file."""
         try:
@@ -138,7 +168,10 @@ class NominalOrchestrator:
         if not result:
             return False
 
-        # 3. Rename and move file
+        # 3. Apply orchestrator-level derived variables
+        self._apply_orchestrator_derivations(result)
+
+        # 4. Rename and move file
         new_filename = self._generate_filename(result, filename_pattern)
         new_path = output_path / f"{new_filename}{file_path.suffix}"
 
@@ -153,6 +186,33 @@ class NominalOrchestrator:
         logger.info(f"✓ Renamed {file_path.name} to {new_path.name}")
         return True
 
+    def _apply_orchestrator_derivations(self, result: dict[str, Any]) -> None:
+        """
+        Compute orchestrator-level derived variables.
+        """
+        if not self.orchestrator_derived_vars:
+            return
+
+        # Combine all existing variables for derivation
+        all_vars = {
+            "rule_id": result["rule_id"],
+            "document_id": result.get("document_id"),
+        }
+        all_vars.update(result.get("global_variables", {}))
+        all_vars.update(result.get("local_variables", {}))
+
+        # Apply derivations
+        for var_name, derivation_func in self.orchestrator_derived_vars.items():
+            try:
+                derived_val = derivation_func(all_vars)
+                # Store in local_variables for now as it's document-specific
+                if "local_variables" not in result:
+                    result["local_variables"] = {}
+                result["local_variables"][var_name] = derived_val
+                logger.debug(f"Orchestrator derivation: {var_name} = '{derived_val}'")
+            except Exception as e:
+                logger.warning(f"Failed to derive orchestrator variable {var_name}: {e}")
+
     def _generate_filename(self, result: dict[str, Any], pattern: str) -> str:
         """
         Generate a new filename based on pattern and extracted variables.
@@ -160,6 +220,7 @@ class NominalOrchestrator:
         # Combine all variables for pattern matching
         all_vars = {
             "rule_id": result["rule_id"],
+            "document_id": result.get("document_id"),
         }
         all_vars.update(result.get("global_variables", {}))
         all_vars.update(result.get("local_variables", {}))
@@ -167,7 +228,6 @@ class NominalOrchestrator:
         # Replace missing variables with 'UNKNOWN'
         # We use a custom formatting approach to handle missing keys gracefully
         filename = pattern
-        import re
 
         placeholders = re.findall(r"\{(\w+)\}", pattern)
         for placeholder in placeholders:

@@ -262,6 +262,15 @@ class NominalProcessor:
 
         return results
 
+    def get_all_declared_variables(self) -> set[str]:
+        """Get a set of all variable names declared across all rules."""
+        variables = {"rule_id", "document_id", "FORM_NAME"}
+        for rule in self.global_rules + self.form_rules:
+            variables.update(rule.global_variables)
+            variables.update(rule.local_variables)
+            variables.update(rule.derived_variables)
+        return variables
+
     def get_global_variables(self) -> dict[str, str]:
         """Get the current batch-level global variables."""
         return self.global_variables.copy()

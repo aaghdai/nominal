@@ -89,7 +89,7 @@ python tools/validate_rules.py
 
 ## Adding New Rules
 
-1. **Form Rule**: Add a new YAML file in `forms/` with `rule_id`, `criteria`, and `actions` (including setting `FORM_NAME`)
-2. **Global Rule**: Add a new YAML file in `global/` with `rule_id`, `criteria`, and `actions`
+1. **Form Rule**: Add a new YAML file in `forms/` with `rule_id`, `variables`, `criteria`, and `actions` (including setting `FORM_NAME`)
+2. **Global Rule**: Add a new YAML file in `global/` with `rule_id`, `variables`, `criteria`, and `actions`
 3. Run validation to ensure the rule is correct
 4. Run tests to verify behavior
