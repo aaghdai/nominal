@@ -21,3 +21,14 @@ repos:
         args: [--fix, --exit-non-zero-on-fix]
       # Run the formatter
       - id: ruff-format
+
+  # Local hooks
+  - repo: local
+    hooks:
+      - id: validate-rules
+        name: Validate rule files
+        entry: uv run python tools/validate_rules.py
+        language: system
+        args: [rules]
+        files: ^rules/.*\.ya?ml$
+        pass_filenames: false
