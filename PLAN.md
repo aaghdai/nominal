@@ -83,27 +83,6 @@ Renames or labels the file based on a specified format and the variables extract
 - ✅ First-match rule selection
 - ✅ Comprehensive error handling
 
-### Milestone 2: Process a Batch of PDF Files
-- **Goal**: Create the `nominal-processor` component to handle batch processing and variable extraction.
-- **Key Features**:
-    - Support batch input.
-    - Handle variable scope:
-        - **Document-specific**: Values differ per file (e.g., SSN).
-        - **Batch-level**: Values shared across files in the batch.
-- **Inputs**:
-    1. Description of variables and parsing rules (e.g., Regex).
-    2. Scope definitions for variables.
-    3. Content of parsed PDFs (from Reader).
-- **Output**:
-    - Values of document-specific variables for each file.
-    - Values of batch-level variables.
-
-**See detailed documentation:**
-- Implementation: `src/nominal/processor/` and `src/nominal/rules/` packages
-- API Documentation: `docs/processor.md`
-- DSL Specification: `rules/README.md`
-- Example Usage: `examples/example_processor.py`
-
 ### ✅ Milestone 3: Implement Orchestrator (COMPLETED)
 - **Goal**: Create the `nominal-orchestrator` to orchestrate the workflow and rename files.
 - **Status**: ✅ Complete
@@ -122,42 +101,129 @@ Renames or labels the file based on a specified format and the variables extract
 - **Error Handling**:
     - If a file cannot be renamed (e.g., matching failed), write an error log to the output path.
 - **Location**: `src/nominal/orchestrator/` package
+- **CLI**: `nominal` command for basic processing
+
+### ✅ Milestone 4: Advanced Features (COMPLETED)
+- **Goal**: Add advanced capabilities for complex use cases
+- **Status**: ✅ Complete
+- **Implementation**:
+    - ✅ **Orchestrator-Level Derived Variables**: Implemented programmatic variable derivation
+    - ✅ **Pattern Validation**: Validates filename patterns against declared variables
+    - ✅ **CLI Command for Derived Variables**: Created `nominal-derived` command with built-in derivation functions
+    - ✅ **Comprehensive Documentation**: Added examples and usage guides
+- **Built-in Derived Variables**:
+    - `LAST_NAME` - Extract last name from FULL_NAME
+    - `FIRST_NAME` - Extract first name from FULL_NAME
+    - `FULL_TIN` - Format TIN with dashes (XXX-XX-XXXX)
+    - `NAME_TIN_COMBO` - Combined last name and TIN last 4
+    - `YEAR` - Document year
+- **Location**:
+    - Code: `src/nominal/orchestrator/orchestrator.py`
+    - CLI: `src/nominal/scripts_derived.py`
+    - Documentation: `README.md`, `scripts/README.md`
 
 ## Summary
 
-### What's Working
+### ✅ All Core Features Complete
 
-1. **Nominal Reader** (Milestone 1)
-   - Reads PDF files with text extraction
-   - Automatic OCR for image-based PDFs
-   - Tested with real sample documents
+**1. Nominal Reader** (Milestone 1)
+   - ✅ Reads PDF files with text extraction
+   - ✅ Automatic OCR for image-based PDFs
+   - ✅ Configurable OCR threshold
+   - ✅ Tested with real sample documents
 
-2. **Nominal Processor** (Milestone 2)
-   - YAML-based rule DSL for form identification
-   - Pattern matching with regex support
-   - Variable extraction and transformation
-   - Composite criteria (all/any)
-   - Batch processing capability
-   - 29 tests, all passing
+**2. Nominal Processor** (Milestone 2)
+   - ✅ YAML-based rule DSL for form identification
+   - ✅ Pattern matching with regex support
+   - ✅ Variable extraction and transformation
+   - ✅ Composite criteria (all/any)
+   - ✅ Batch processing capability
+   - ✅ Global and local variable scoping
+   - ✅ 46 tests, all passing
 
-### Next Steps
+**3. Nominal Orchestrator** (Milestone 3)
+   - ✅ End-to-end workflow orchestration
+   - ✅ Pattern-based file renaming
+   - ✅ Batch directory processing
+   - ✅ Error handling and unmatched file tracking
+   - ✅ CLI interface (`nominal` command)
+   - ✅ Integration tests
 
-To complete **Milestone 3 (Orchestrator)**:
-1. Create orchestrator module
-2. Implement file renaming logic
-3. Add batch directory processing
-4. Implement error logging
-5. Add configuration for output format
-6. Create end-to-end tests
+**4. Advanced Features** (Milestone 4)
+   - ✅ Orchestrator-level derived variables
+   - ✅ Pattern validation against declared variables
+   - ✅ Advanced CLI (`nominal-derived` command)
+   - ✅ Comprehensive documentation and examples
 
-### Example Workflow (When Complete)
+### Current Capabilities
 
+The system can now:
+- ✅ Read PDFs (including image-based with OCR)
+- ✅ Identify document types using configurable rules
+- ✅ Extract variables from documents (names, SSNs, form types)
+- ✅ Process batches of documents
+- ✅ Rename files based on extracted variables
+- ✅ Handle unmatched documents gracefully
+- ✅ Compute derived variables programmatically
+- ✅ Validate filename patterns
+- ✅ Run via simple or advanced CLI
+
+### Example Workflows
+
+**Basic Processing:**
 ```bash
 # Process a directory of tax documents
-nominal process --input ./documents --output ./organized --rules ./rules
+uv run nominal process \
+  --input ./test_input \
+  --output ./output_results \
+  --rules ./rules \
+  --pattern "{rule_id}_{LAST_NAME}_{TIN_LAST_FOUR}"
 
 # Result:
-# documents/scan001.pdf → organized/W2_Smith_6789.pdf
-# documents/scan002.pdf → organized/1099-MISC_Johnson_4321.pdf
-# documents/scan003.pdf → organized/UNMATCHED_scan003.pdf (with error log)
+# test_input/2024 - Amplitude - Form W2.pdf → output_results/W2_UNKNOWN_5149.pdf
+# test_input/2024 - Chase - 1099INT.pdf → output_results/unmatched/ (no matching rule)
 ```
+
+**Advanced Processing with Derived Variables:**
+```bash
+# Use built-in derived variables for more sophisticated patterns
+uv run nominal-derived \
+  --input ./test_input \
+  --output ./output_results \
+  --rules ./rules \
+  --pattern "{YEAR}_{LAST_NAME}_{FIRST_NAME}_{rule_id}"
+
+# Result: Uses derived YEAR, LAST_NAME, FIRST_NAME variables
+```
+
+**Programmatic API:**
+```python
+from nominal.orchestrator import NominalOrchestrator
+
+# Define custom derived variable
+def extract_year(all_vars):
+    return all_vars.get("TAX_YEAR", "2024")
+
+# Create orchestrator with custom derivations
+orchestrator = NominalOrchestrator(
+    rules_dir="rules/",
+    derived_variables={"YEAR": extract_year}
+)
+
+# Process with custom variables in pattern
+stats = orchestrator.process_directory(
+    input_dir="input/",
+    output_dir="output/",
+    filename_pattern="{YEAR}_{rule_id}_{LAST_NAME}"
+)
+```
+
+### Future Enhancements (Optional)
+
+Potential areas for expansion:
+- 📋 Support for additional document types (1099-INT, 1040, etc.)
+- 📋 Machine learning-based form classification
+- 📋 GUI interface for rule creation
+- 📋 Cloud storage integration
+- 📋 Batch statistics and reporting dashboard
+- 📋 Support for more file formats (DOCX, images, etc.)
