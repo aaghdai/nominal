@@ -5,7 +5,9 @@ Unit tests for the Nominal Processor.
 import pytest
 from nominal.processor import (
     RuleParser, Rule, Criterion, Action,
-    CriteriaEvaluator, ActionExecutor, NominalProcessor
+    ContainsCriterion, RegexCriterion, AllCriterion, AnyCriterion,
+    SetAction, RegexExtractAction, DeriveAction, ExtractAction,
+    NominalProcessor, CriterionType, ActionType
 )
 import tempfile
 import os
@@ -62,7 +64,8 @@ class TestRuleParser:
         parser = RuleParser()
         criterion = parser._parse_criterion(criterion_data)
         
-        assert criterion.type == 'regex'
+        assert criterion.get_type() == CriterionType.REGEX
+        assert isinstance(criterion, RegexCriterion)
         assert criterion.pattern == r'\d{3}-\d{2}-\d{4}'
         assert criterion.capture is True
         assert criterion.variable == 'SSN'
@@ -80,7 +83,8 @@ class TestRuleParser:
         parser = RuleParser()
         criterion = parser._parse_criterion(criterion_data)
         
-        assert criterion.type == 'all'
+        assert criterion.get_type() == CriterionType.ALL
+        assert isinstance(criterion, AllCriterion)
         assert len(criterion.sub_criteria) == 2
     
     def test_parse_derive_action(self):
@@ -96,7 +100,8 @@ class TestRuleParser:
         parser = RuleParser()
         action = parser._parse_action(action_data)
         
-        assert action.type == 'derive'
+        assert action.get_type() == ActionType.DERIVE
+        assert isinstance(action, DeriveAction)
         assert action.variable == 'SSN_LAST_FOUR'
         assert action.from_var == 'SSN'
         assert action.method == 'slice'
@@ -110,182 +115,151 @@ class TestRuleParser:
             parser.parse_dict({'form_name': 'W2'})
 
 
-class TestCriteriaEvaluator:
-    """Tests for CriteriaEvaluator."""
+class TestCriterion:
+    """Tests for Criterion subclasses."""
     
-    def test_evaluate_contains_case_sensitive(self):
+    def test_contains_case_sensitive(self):
         """Test case-sensitive contains evaluation."""
-        criterion = Criterion(
-            type='contains',
+        criterion = ContainsCriterion(
             value='Form W-2',
             case_sensitive=True
         )
         
-        evaluator = CriteriaEvaluator()
-        
-        assert evaluator.evaluate(criterion, 'This is Form W-2') is True
-        assert evaluator.evaluate(criterion, 'This is form w-2') is False
+        assert criterion.match('This is Form W-2') is True
+        assert criterion.match('This is form w-2') is False
     
-    def test_evaluate_contains_case_insensitive(self):
+    def test_contains_case_insensitive(self):
         """Test case-insensitive contains evaluation."""
-        criterion = Criterion(
-            type='contains',
+        criterion = ContainsCriterion(
             value='Form W-2',
             case_sensitive=False
         )
         
-        evaluator = CriteriaEvaluator()
-        
-        assert evaluator.evaluate(criterion, 'This is Form W-2') is True
-        assert evaluator.evaluate(criterion, 'This is form w-2') is True
-        assert evaluator.evaluate(criterion, 'This is FORM W-2') is True
+        assert criterion.match('This is Form W-2') is True
+        assert criterion.match('This is form w-2') is True
+        assert criterion.match('This is FORM W-2') is True
     
-    def test_evaluate_regex(self):
+    def test_regex_criterion(self):
         """Test regex evaluation."""
-        criterion = Criterion(
-            type='regex',
+        criterion = RegexCriterion(
             pattern=r'\d{3}-\d{2}-\d{4}'
         )
         
-        evaluator = CriteriaEvaluator()
-        
-        assert evaluator.evaluate(criterion, 'SSN: 123-45-6789') is True
-        assert evaluator.evaluate(criterion, 'SSN: 12-345-6789') is False
+        assert criterion.match('SSN: 123-45-6789') is True
+        assert criterion.match('SSN: 12-345-6789') is False
     
-    def test_evaluate_regex_with_capture(self):
+    def test_regex_with_capture(self):
         """Test regex evaluation with capture."""
-        criterion = Criterion(
-            type='regex',
+        criterion = RegexCriterion(
             pattern=r'\d{3}-\d{2}-\d{4}',
             capture=True,
             variable='SSN'
         )
         
-        evaluator = CriteriaEvaluator()
-        result = evaluator.evaluate(criterion, 'SSN: 123-45-6789')
+        result = criterion.match('SSN: 123-45-6789')
         
         assert result is True
-        assert evaluator.captured_values['SSN'] == '123-45-6789'
+        assert criterion.captured_values['SSN'] == '123-45-6789'
     
-    def test_evaluate_all_criterion(self):
+    def test_all_criterion(self):
         """Test 'all' composite criterion."""
         sub_criteria = [
-            Criterion(type='contains', value='test1', case_sensitive=False),
-            Criterion(type='contains', value='test2', case_sensitive=False)
+            ContainsCriterion(value='test1', case_sensitive=False),
+            ContainsCriterion(value='test2', case_sensitive=False)
         ]
         
-        criterion = Criterion(
-            type='all',
-            sub_criteria=sub_criteria
-        )
+        criterion = AllCriterion(sub_criteria=sub_criteria)
         
-        evaluator = CriteriaEvaluator()
-        
-        assert evaluator.evaluate(criterion, 'test1 and test2') is True
-        assert evaluator.evaluate(criterion, 'test1 only') is False
+        assert criterion.match('test1 and test2') is True
+        assert criterion.match('test1 only') is False
     
-    def test_evaluate_any_criterion(self):
+    def test_any_criterion(self):
         """Test 'any' composite criterion."""
         sub_criteria = [
-            Criterion(type='contains', value='test1', case_sensitive=False),
-            Criterion(type='contains', value='test2', case_sensitive=False)
+            ContainsCriterion(value='test1', case_sensitive=False),
+            ContainsCriterion(value='test2', case_sensitive=False)
         ]
         
-        criterion = Criterion(
-            type='any',
-            sub_criteria=sub_criteria
-        )
+        criterion = AnyCriterion(sub_criteria=sub_criteria)
         
-        evaluator = CriteriaEvaluator()
-        
-        assert evaluator.evaluate(criterion, 'test1 only') is True
-        assert evaluator.evaluate(criterion, 'test2 only') is True
-        assert evaluator.evaluate(criterion, 'neither') is False
+        assert criterion.match('test1 only') is True
+        assert criterion.match('test2 only') is True
+        assert criterion.match('neither') is False
 
 
-class TestActionExecutor:
-    """Tests for ActionExecutor."""
+class TestAction:
+    """Tests for Action subclasses."""
     
-    def test_execute_set_action(self):
+    def test_set_action(self):
         """Test set action execution."""
-        action = Action(
-            type='set',
+        action = SetAction(
             variable='FORM_NAME',
             value='W2'
         )
         
-        executor = ActionExecutor('')
-        executor.execute(action)
+        result = action.act('', {})
         
-        assert executor.variables['FORM_NAME'] == 'W2'
+        assert result == 'W2'
     
-    def test_execute_regex_extract_action(self):
+    def test_regex_extract_action(self):
         """Test regex_extract action execution."""
         text = 'Employee Name: John Doe'
         
-        action = Action(
-            type='regex_extract',
+        action = RegexExtractAction(
             variable='FIRST_NAME',
-            from_text=True,
             pattern=r'Name:\s+(\w+)\s+(\w+)',
-            group=1
+            group=1,
+            from_text=True
         )
         
-        executor = ActionExecutor(text)
-        executor.execute(action)
+        result = action.act(text, {})
         
-        assert executor.variables['FIRST_NAME'] == 'John'
+        assert result == 'John'
     
-    def test_execute_derive_slice_action(self):
+    def test_derive_slice_action(self):
         """Test derive action with slice method."""
-        executor = ActionExecutor('')
-        executor.variables['SSN'] = '123-45-6789'
+        variables = {'SSN': '123-45-6789'}
         
-        action = Action(
-            type='derive',
+        action = DeriveAction(
             variable='SSN_LAST_FOUR',
             from_var='SSN',
             method='slice',
             args={'start': -4}
         )
         
-        executor.execute(action)
+        result = action.act('', variables)
         
-        assert executor.variables['SSN_LAST_FOUR'] == '6789'
+        assert result == '6789'
     
-    def test_execute_derive_upper_action(self):
+    def test_derive_upper_action(self):
         """Test derive action with upper method."""
-        executor = ActionExecutor('')
-        executor.variables['NAME'] = 'john doe'
+        variables = {'NAME': 'john doe'}
         
-        action = Action(
-            type='derive',
+        action = DeriveAction(
             variable='NAME_UPPER',
             from_var='NAME',
             method='upper',
             args={}
         )
         
-        executor.execute(action)
+        result = action.act('', variables)
         
-        assert executor.variables['NAME_UPPER'] == 'JOHN DOE'
+        assert result == 'JOHN DOE'
     
-    def test_execute_extract_split_action(self):
+    def test_extract_split_action(self):
         """Test extract action with split method."""
-        executor = ActionExecutor('')
-        executor.variables['FULL_NAME'] = 'John Doe'
+        variables = {'FULL_NAME': 'John Doe'}
         
-        action = Action(
-            type='extract',
+        action = ExtractAction(
             variable='FIRST_NAME',
             from_var='FULL_NAME',
             method='split',
             args={'pattern': r'\s+', 'index': 0}
         )
         
-        executor.execute(action)
+        result = action.act('', variables)
         
-        assert executor.variables['FIRST_NAME'] == 'John'
+        assert result == 'John'
 
 
 class TestNominalProcessor:

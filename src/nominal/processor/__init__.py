@@ -1,39 +1,42 @@
 """
 Nominal Processor: Rule-based document processing engine.
 
-This module provides backward compatibility imports from the processor package.
-All functionality has been moved to the processor package for better organization.
+This package implements a DSL-based processor for extracting information
+from tax documents based on configurable rules.
 """
 
-# Import everything from the processor package for backward compatibility
-from .processor import (
-    # Enums
-    VariableScope,
-    CriterionType,
-    ActionType,
-    # Variables
-    Variable,
-    GlobalVariable,
-    LocalVariable,
-    # Criteria
+# Enums
+from .enums import VariableScope, CriterionType, ActionType
+
+# Variables
+from .variable import Variable, GlobalVariable, LocalVariable
+
+# Criteria
+from .criterion import (
     Criterion,
     ContainsCriterion,
     RegexCriterion,
     AllCriterion,
-    AnyCriterion,
-    # Actions
+    AnyCriterion
+)
+
+# Actions
+from .action import (
     Action,
     SetAction,
     RegexExtractAction,
     DeriveAction,
-    ExtractAction,
-    # Rule
-    Rule,
-    # Parser
-    RuleParser,
-    # Main processor
-    NominalProcessor,
+    ExtractAction
 )
+
+# Rule
+from .rule import Rule
+
+# Parser
+from .parser import RuleParser
+
+# Main processor
+from .processor import NominalProcessor
 
 __all__ = [
     # Enums
@@ -63,3 +66,4 @@ __all__ = [
     # Main processor
     'NominalProcessor',
 ]
+
