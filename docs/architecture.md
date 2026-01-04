@@ -159,14 +159,7 @@
 │ {                     │
 │   form_name: "W2"     │
 │   FIRST_NAME: "John"  │
-│   LAST_NAME: "Smith"  │
-│   SSN: "XXX-XX-6789"  │
-│   SSN_LAST_FOUR: "..."│
-│ }                     │
-└───────────┬───────────┘
-            │
-            ▼
-┌──────────────────────────┐
+│   LAST_NAME: "Smith"  │https://github.com/aaghdai/nominal/
 │ Output: W2_Smith_6789.pdf│
 └──────────────────────────┘
 ```
