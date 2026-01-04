@@ -166,6 +166,39 @@ Extract from variable using various methods.
     index: 0
 ```
 
+### validated_regex_extract
+Extract and validate person names using US Census data (Milestone 4).
+
+```yaml
+- type: validated_regex_extract
+  variable: FULL_NAME
+  from_text: true
+  pattern: '\b([A-Z][A-Z]+(?:\s+[A-Z]\.?)?\s+[A-Z][A-Z]+)'
+  group: 1
+  min_confidence: 0.5  # Optional, defaults to 0.5
+```
+
+**Features:**
+- Extracts all candidates matching the pattern
+- Validates each against US Census first/last name databases (90K+ entries)
+- Scores candidates with confidence levels (0.0-1.0)
+- Returns highest-confidence match above threshold
+- Distinguishes person names from organization names
+
+**Confidence Scoring:**
+- First name in database: +0.5
+- Last name in database: +0.5
+- Has middle initial: +0.1
+- Maximum: 1.0
+
+**Example Results:**
+- `MICHAEL M JORDAN`: 1.0 ✅ (both names + middle initial)
+- `ELIZABETH A DARLING`: 1.0 ✅ (both names + middle initial)
+- `UNIVERSITY OF PITTSBURGH`: 0.0 ❌ (not valid person name)
+- `STERLING HEIGHTS`: 0.0 ❌ (city name, not person)
+
+See [docs/name_extraction_strategy.md](name_extraction_strategy.md) for implementation details.
+
 ## API Reference
 
 ### NominalProcessor
