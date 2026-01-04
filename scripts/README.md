@@ -2,6 +2,60 @@
 
 Utility scripts for maintaining the Nominal project.
 
+## generate_name_dictionaries.py
+
+Generates name validation dictionaries from US Census and SSA data sources.
+
+### Usage
+
+```bash
+# From project root
+python scripts/generate_name_dictionaries.py
+
+# Or using uv
+uv run python scripts/generate_name_dictionaries.py
+```
+
+### What it does
+
+1. **Downloads US Census Bureau surnames** (2010)
+   - URL: https://www2.census.gov/topics/genealogy/2010surnames/names.zip
+   - Extracts top 50,000 surnames
+   - Creates `data/last_names.txt`
+
+2. **Downloads SSA baby names** (2020-2023)
+   - URL: https://www.ssa.gov/oact/babynames/names.zip
+   - Processes 4 years of data
+   - Extracts ~40,836 unique first names
+   - Creates `data/first_names.txt`
+
+3. **Cleans up automatically**
+   - Uses temporary directory for downloads
+   - Removes intermediate files
+
+### Requirements
+
+- `wget` or `curl` must be installed
+- Python 3.8+ with standard library (no extra dependencies)
+
+### When to run
+
+- Initial project setup (if name dictionaries are missing)
+- To update dictionaries with newer data sources
+- After modifying the extraction logic
+
+### Output
+
+```
+data/
+├── first_names.txt    # ~40,836 names, ~287 KB
+└── last_names.txt     # 50,000 surnames, ~374 KB
+```
+
+These files enable the `validated_regex_extract` action type to distinguish person names from organization names with high accuracy.
+
+---
+
 ## update_changelog_stats.sh
 
 Automatically updates the statistics section in `CHANGELOG.md` with current project metrics.

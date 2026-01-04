@@ -27,11 +27,16 @@ cd nominal
 # Install dependencies
 uv sync
 
+# Generate name validation dictionaries (recommended for accurate name extraction)
+python scripts/generate_name_dictionaries.py
+
 # Optional: Configure logging level via .env file
 cp .env.example .env
 # Edit .env to set NOMINAL_LOG_LEVEL (DEBUG, INFO, WARNING, ERROR, CRITICAL)
 # Log level is automatically loaded from .env file when package is imported
 ```
+
+**Note:** The name dictionaries (`data/first_names.txt` and `data/last_names.txt`) are included in the repository, but you can regenerate them anytime using the script above. This downloads fresh data from US Census Bureau and Social Security Administration sources.
 
 ### Basic Usage
 
@@ -236,6 +241,7 @@ nominal/
 │           ├── criterion.py   # Criterion implementations
 │           ├── enums.py       # Type enumerations
 │           ├── manager.py     # Rules manager
+│           ├── name_validator.py  # Name validation using Census data
 │           ├── parser.py      # YAML parser
 │           ├── rule.py        # Rule data structures
 │           └── validator.py   # Rule validation
@@ -266,10 +272,15 @@ nominal/
 │   ├── architecture.md
 │   └── logging/
 ├── scripts/                   # Utility scripts
+│   ├── generate_name_dictionaries.py  # Generate Census/SSA name data
 │   ├── update_changelog_stats.sh
 │   └── README.md
 ├── tools/                     # Development tools
 │   ├── validate_rules.py      # Rule validation tool
+│   └── README.md
+├── data/                      # Reference data for validation
+│   ├── first_names.txt        # 40K+ first names from SSA
+│   ├── last_names.txt         # 50K surnames from US Census
 │   └── README.md
 ├── .env.example               # Environment variables template
 ├── CHANGELOG.md               # Project changelog

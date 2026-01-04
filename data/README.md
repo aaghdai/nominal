@@ -70,36 +70,21 @@ This validation helps distinguish between:
 
 ### Regenerating the Data
 
-To update or regenerate the name dictionaries:
+To update or regenerate the name dictionaries, use the provided script:
 
 ```bash
-cd data/
+# From project root
+python scripts/generate_name_dictionaries.py
 
-# Download and extract surnames (top 50,000)
-wget https://www2.census.gov/topics/genealogy/2010surnames/names.zip
-unzip names.zip
-python3 -c "
-import csv
-with open('Names_2010Census.csv', 'r') as f:
-    reader = csv.DictReader(f)
-    surnames = [row['name'].strip().upper() for row in reader][:50000]
-with open('last_names.txt', 'w') as f:
-    f.write('\n'.join(surnames))
-"
-
-# Download and extract first names (2020-2023)
-wget https://www.ssa.gov/oact/babynames/names.zip
-unzip -o names.zip yob2020.txt yob2021.txt yob2022.txt yob2023.txt
-python3 -c "
-first_names = set()
-for year in [2020, 2021, 2022, 2023]:
-    with open(f'yob{year}.txt', 'r') as f:
-        for line in f:
-            first_names.add(line.split(',')[0].strip().upper())
-with open('first_names.txt', 'w') as f:
-    f.write('\n'.join(sorted(first_names)))
-"
-
-# Clean up
-rm -f yob*.txt Names_2010Census.* names.zip
+# Or using uv
+uv run python scripts/generate_name_dictionaries.py
 ```
+
+The script will:
+1. Download US Census Bureau surnames (2010)
+2. Download SSA baby names (2020-2023)
+3. Process and extract unique names
+4. Create `data/first_names.txt` and `data/last_names.txt`
+5. Clean up temporary files automatically
+
+**Requirements:** `wget` or `curl` must be installed on your system.
