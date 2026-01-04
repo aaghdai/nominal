@@ -400,6 +400,11 @@ See [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
+This project was developed with the assistance of AI pair programming using:
+- [Cursor](https://cursor.com/) - AI-powered code editor
+- [Claude Sonnet 4.5](https://www.anthropic.com/claude) - For architecture design, implementation, and documentation
+- [Gemini 3 Flash](https://deepmind.google/technologies/gemini/) - For additional code generation and optimization
+
 Built with:
 - [PyMuPDF](https://pymupdf.readthedocs.io/) for PDF processing
 - [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) for text recognition
